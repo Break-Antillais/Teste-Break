@@ -269,22 +269,37 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
   transition: all .15s; flex-shrink: 0;
 }
 .tab-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
-.pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; padding: 0 .9rem .9rem; }
+.pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; padding: 0 .9rem .9rem; }
 .pcard {
-  background: var(--dark3); border: 1.5px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; cursor: pointer;
-  transition: all .2s; position: relative;
+  background: var(--dark3); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; cursor: pointer;
+  transition: transform .18s, border-color .18s, box-shadow .18s; position: relative;
   touch-action: manipulation;
   -webkit-tap-highlight-color: rgba(200,35,43,.15);
 }
 .pcard:hover { border-color: var(--red); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(200,35,43,.15); }
-.pcard.unavail { opacity: .45; cursor: not-allowed; }
-.pcard-img { width: 100%; height: 100px; background: var(--dark4); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+.pcard.unavail { opacity: .5; cursor: not-allowed; }
+.pcard-img { width: 100%; height: 112px; background: var(--dark4); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
 .pcard-img img { width: 100%; height: 100%; object-fit: cover; }
-.pcard-body { padding: .65rem .75rem; }
-.pcard-name { font-weight: 700; font-size: .84rem; line-height: 1.3; margin-bottom: .2rem; }
-.pcard-desc { font-size: .7rem; color: var(--muted); margin-bottom: .35rem; line-height: 1.4; }
-.pcard-price { font-family: var(--head); font-weight: 800; color: var(--gold); font-size: .95rem; }
+.pcard-fav {
+  position: absolute; top: .45rem; left: .45rem; z-index: 2;
+  background: rgba(0,0,0,.5); border: none; border-radius: 50%;
+  width: 28px; height: 28px; cursor: pointer; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.pcard-body { padding: .6rem .7rem .65rem; }
+.pcard-name { font-weight: 700; font-size: .85rem; line-height: 1.25; margin-bottom: .15rem; color: var(--text); }
+.pcard-desc { font-size: .7rem; color: var(--muted); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pcard-foot { display: flex; align-items: center; justify-content: space-between; margin-top: .5rem; gap: .4rem; }
+.pcard-price { font-family: var(--head); font-weight: 800; color: var(--gold); font-size: .98rem; }
+.pcard-add {
+  width: 30px; height: 30px; border-radius: 50%; border: none; flex-shrink: 0;
+  background: var(--red); color: #fff; font-size: 1.25rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: transform .12s, background .12s; -webkit-tap-highlight-color: transparent;
+}
+.pcard-add:hover { background: var(--red2); transform: scale(1.08); }
+.pcard-add:active { transform: scale(.92); }
 .soon-badge {
   position: absolute; top: .45rem; right: .45rem;
   background: var(--red); color: #fff; font-size: .6rem;
@@ -1836,25 +1851,21 @@ function renderHome() {
   });
 
   var html = '<div style="padding-bottom:1rem">';
-  html += '<div id="home-hero-inner" style="text-align:center;padding:2rem 1.5rem 1.25rem">';
-  html += '<div style="display:inline-flex;align-items:center;background:rgba(200,35,43,.1);border:1px solid rgba(200,35,43,.3);border-radius:100px;padding:.28rem .8rem;font-size:.72rem;font-weight:700;color:var(--red);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.85rem">🌴 Specialites Antillaises</div>';
-  html += '<div style="line-height:1;margin-bottom:.5rem">'
-    +'<div style="font-family:var(--head);font-weight:800;font-size:3rem;color:#fff;letter-spacing:-.02em">Break</div>'
-    +'<div style="font-family:var(--script);font-weight:700;font-size:2.6rem;color:var(--red)">Antillais</div>'
-    +'</div>';
-  html += '<p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem">Bokit · Agoulou · Crepes</p>';
-  if (user) html += '<p style="font-weight:600">Bonjour <span style="color:var(--red)">'+user.prenom+'</span> 👋</p>';
-  html += '<div style="margin-top:.75rem">';
-  // N'afficher le badge statut que si pas de fermeture exceptionnelle
+  html += '<div id="home-hero-inner" style="padding:.9rem 1rem .35rem">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">';
+  if (user) html += '<div style="font-weight:700;font-size:1rem">Bonjour <span style="color:var(--red)">'+user.prenom+'</span> 👋</div>';
+  else html += '<div style="font-weight:700;font-size:.95rem;color:var(--red)">🌴 Specialites Antillaises</div>';
+  // Badge statut (sauf fermeture exceptionnelle)
   if (!todayClosed) {
-    html += '<span style="display:inline-flex;align-items:center;gap:.4rem;'
-      +'padding:.25rem .8rem;border-radius:100px;font-size:.75rem;font-weight:700;'
+    html += '<span style="display:inline-flex;align-items:center;gap:.35rem;'
+      +'padding:.25rem .75rem;border-radius:100px;font-size:.72rem;font-weight:700;'
       +'background:'+(open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)')
       +';color:'+(open?'#10b981':'#ef4444')+'">'
-      +(open?'🟢 Commandes ouvertes jusqu&apos;a '+cfg.cutoff:'🔴 Commandes du jour fermees')
+      +(open?'🟢 Jusqu&apos;a '+cfg.cutoff:'🔴 Ferme')
       +'</span>';
   }
-  if (!open) html += '</div>'; // close margin-top
+  html += '</div>';
+  html += '<div style="font-size:.74rem;color:var(--muted);margin-top:.3rem">Bokit · Agoulou · Crepes — Retrait '+cfg.start+'–'+cfg.end+'</div>';
   html += '</div>'; // close hero
   // Not a work day message
   if (!isWorkDay) {
@@ -1878,7 +1889,6 @@ function renderHome() {
         +'</div>';
     }
   }
-  html += '<p style="font-size:.78rem;color:var(--muted);margin-top:.35rem;text-align:center">Retrait '+cfg.start+' — '+cfg.end+'</div>';
   html += '</div>';
 
   // Offres
@@ -1961,25 +1971,29 @@ function pcardHTML(p) {
   var cls = 'pcard' + (clickable ? '' : ' unavail');
   var _imgSrc = p.image && p.image.indexOf('__firebase__') === 0 ? null : p.image;
   var _imgId = 'pimg-' + p.id;
+  var _tint = {bokit:'#242018',agoulou:'#1e2420',crepe_salee:'#20221a',crepe_sucree:'#251d20',boisson:'#1a2024',mini_bokit:'#231f1a',enfant:'#22201a'}[p.cat] || 'var(--dark4)';
   var imgHtml = _imgSrc
     ? '<div class="pcard-img"><img src="'+_imgSrc+'" id="'+_imgId+'" alt="'+p.name+'"/></div>'
     : (p.image && p.image.indexOf('__firebase__') === 0)
-      ? '<div class="pcard-img" id="pwrap-'+p.id+'"><div style="width:100%;height:100%;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:1.5rem">'+(EMOJI[p.cat]||'\uD83C\uDF7D')+'</div></div>'
-      : '<div class="pcard-img">'+(EMOJI[p.cat]||'\uD83C\uDF7D')+'</div>';
+      ? '<div class="pcard-img" id="pwrap-'+p.id+'" style="background:'+_tint+'">'+(EMOJI[p.cat]||'\uD83C\uDF7D')+'</div>'
+      : '<div class="pcard-img" style="background:'+_tint+'">'+(EMOJI[p.cat]||'\uD83C\uDF7D')+'</div>';
   var allergenBadge = (p.allergens && p.allergens.length)
-    ? '<div style="font-size:.7rem;color:#f59e0b;margin-top:.2rem">\u26a0 '+p.allergens.join(', ')+'</div>'
+    ? '<div style="font-size:.66rem;color:#f59e0b;margin-top:.25rem">\u26a0 '+p.allergens.join(', ')+'</div>'
     : '';
   var user = getCurrentUser();
   var favs = user ? load('ba_favs_'+user.id, []) : [];
   var isFav = favs.indexOf(p.id) >= 0;
   var favBtn = (clickable && user)
-    ? '<button style="position:absolute;top:.45rem;left:.45rem;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center" data-fid="'+p.id+'" onclick="event.stopPropagation();toggleFav(this.dataset.fid,this)">'+(isFav?'\u2764\uFE0F':'\uD83E\uDD0D')+'</button>'
+    ? '<button class="pcard-fav" data-fid="'+p.id+'" onclick="event.stopPropagation();toggleFav(this.dataset.fid,this)">'+(isFav?'\u2764\uFE0F':'\uD83E\uDD0D')+'</button>'
     : '';
   var priceHtml = p.isClassique
-    ? '<div class="pcard-price" style="font-size:.8rem;color:var(--muted)">Prix selon selection</div>'
-    : '<div class="pcard-price">'+fmt(p.price||0)+'</div>';
+    ? '<span class="pcard-price" style="font-size:.76rem;color:var(--muted);font-family:var(--body);font-weight:600">Selon selection</span>'
+    : '<span class="pcard-price">'+fmt(p.price||0)+'</span>';
   var epuise = stockEmpty || (!p.ok && !p.soon && p.stock === 0);
   var clickAttr = clickable ? ' data-pid="'+p.id+'" onclick="openProduct(this.dataset.pid)"' : '';
+  var addBtn = clickable
+    ? '<button class="pcard-add" data-pid="'+p.id+'" onclick="event.stopPropagation();openProduct(this.dataset.pid)" aria-label="Choisir '+p.name+'">+</button>'
+    : '';
   return '<div class="'+cls+'"'+clickAttr+'>'
     + imgHtml
     + (p.soon ? '<span class="soon-badge">Bientot</span>' : '')
@@ -1989,7 +2003,7 @@ function pcardHTML(p) {
     + '<div class="pcard-name">'+p.name+'</div>'
     + '<div class="pcard-desc">'+(p.desc||'')+'</div>'
     + allergenBadge
-    + priceHtml
+    + '<div class="pcard-foot">'+priceHtml+addBtn+'</div>'
     + '</div></div>';
 }
 

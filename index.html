@@ -2676,7 +2676,7 @@ function showCheckout() {
     var slots=getSlots(date,cfg);
     var g='';
     slots.forEach(function(s){
-      var slotLabel = s.disabled ? s.time+' (indispo)' : s.time;
+      var slotLabel = s.disabled ? s.time+' (indispo)' : (s.past ? s.time+' (passé)' : s.time);
       g+='<button class="slot-btn'+(s.ok?'':' full')+'"'
         +(s.ok?' data-t="'+s.time+'" onclick="pickSlot(this)"':' disabled="disabled"')
         +'>'+slotLabel+'</button>';
@@ -2751,6 +2751,11 @@ function getSlots(date,cfg) {
   var sh=+sp[0],sm=+sp[1],eh=+ep[0],em=+ep[1];
   var max=cfg.maxSlot||8;
   var orders=getOrders().filter(function(o){return o.pickupDate===date&&o.status!=='cancelled';});
+  // Désactivation auto des créneaux dont l'heure est passée (aujourd'hui uniquement, côté client)
+  var _now=new Date();
+  var _todayStr=_now.toISOString().split('T')[0];
+  var _nowMin=_now.getHours()*60+_now.getMinutes();
+  var _isToday=(date===_todayStr);
   var slots=[];
   while(sh*60+sm<=eh*60+em){
     var t=(sh<10?'0':'')+sh+':'+(sm<10?'0':'')+sm;
@@ -2760,7 +2765,8 @@ function getSlots(date,cfg) {
       itemCount+=(o.items||[]).reduce(function(s,i){return s+1;},0);
     });
     var disabled = (cfg.disabledSlots||[]).indexOf(t)>=0;
-    slots.push({time:t,count:itemCount,ok:!disabled&&itemCount<max,disabled:disabled});
+    var past = _isToday && (sh*60+sm)<=_nowMin;
+    slots.push({time:t,count:itemCount,ok:!disabled&&!past&&itemCount<max,disabled:disabled,past:past});
     sm+=30; if(sm>=60){sh++;sm-=60;}
   }
   return slots;

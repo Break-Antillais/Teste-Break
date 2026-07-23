@@ -2709,15 +2709,15 @@ function showCheckout() {
     var anyOk=false;
     slots.forEach(function(s){
       if (s.ok) anyOk=true;
-      var slotLabel = s.disabled ? s.time+' (indispo)' : (s.past ? s.time+' (passé)' : (s.tooSoon ? s.time+' (trop tôt)' : s.time));
+      // Creneaux passes ou trop proches : simplement grises, sans libelle.
+      var slotLabel = s.disabled ? s.time+' (indispo)' : s.time;
       g+='<button class="slot-btn'+(s.ok?'':' full')+'"'
         +(s.ok?' data-t="'+s.time+'" onclick="pickSlot(this)"':' disabled="disabled"')
         +'>'+slotLabel+'</button>';
     });
     if (slots.length && !anyOk) {
-      var _pd=parseInt(cfg.prepDelay,10); if(isNaN(_pd)||_pd<0) _pd=30;
       g+='<div style="grid-column:1/-1;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:var(--radius-sm);padding:.7rem .85rem;font-size:.8rem;color:#f59e0b;line-height:1.45">'
-        +'Plus aucun creneau disponible aujourd&apos;hui. Nous avons besoin de '+_pd+' min pour preparer votre commande — choisissez une autre date ci-dessus.'
+        +'Plus aucun creneau disponible aujourd&apos;hui — choisissez une autre date ci-dessus.'
         +'</div>';
     }
     return g;

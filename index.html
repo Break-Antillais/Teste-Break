@@ -7559,10 +7559,22 @@ function startOrderPolling() {
   }, 5000);
 }
 
+// Commandes deja signalees comme pretes (evite les pop-ups en double)
+var _readyAlerted = {};
 function showOrderReadyAlert(order) {
-  // Sound alert
+  // ── Anti-doublon ──
+  // Trois sources signalent la meme commande prete : le listener temps reel
+  // ba_orders, la notification status_updates envoyee par l'admin, et le
+  // polling 5s. Sans ce garde-fou, plusieurs calques se superposaient et il
+  // fallait appuyer sur "OK j'arrive" autant de fois qu'il y avait de couches.
+  var _key = String((order && (order.id || order.orderNumber)) || 'x');
+  if (_readyAlerted[_key]) return;
+  if (document.getElementById('order-ready-overlay')) return;
+  _readyAlerted[_key] = true;
+  // Sound alert (contexte audio partage : indispensable pour que le son sorte sur mobile)
   try {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = _baGetAudioCtx();
+    if (!ctx) throw new Error('no audio ctx');
     var playBeep = function(freq, start, dur) {
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
@@ -7587,13 +7599,14 @@ function showOrderReadyAlert(order) {
   }
   // Full screen overlay
   var overlay = document.createElement('div');
+  overlay.id = 'order-ready-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9998;display:flex;align-items:center;justify-content:center;animation:fadeIn .3s ease';
   overlay.innerHTML = '<div style="text-align:center;padding:2rem;max-width:360px">'
     +'<div style="font-size:5rem;margin-bottom:1rem;animation:pulse 1s ease-in-out infinite">🎉</div>'
     +'<div style="font-family:var(--head);font-size:2rem;font-weight:800;color:#fff;margin-bottom:.5rem">Votre commande</div>'
     +'<div style="font-family:var(--head);font-size:2rem;font-weight:800;color:var(--red);margin-bottom:.5rem">est prête !</div>'
     +'<div style="font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:2rem">Votre commande est prête !<br>Venez la récupérer !</div>'
-    +'<button class="btn btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem" onclick="this.parentElement.parentElement.remove()">OK, j&apos;arrive ! 🏃</button>'
+    +'<button class="btn btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem" onclick="closeOrderReadyAlert()">OK, j&apos;arrive ! 🏃</button>'
     +'</div>';
   document.body.appendChild(overlay);
   // Request notification permission for future
@@ -7602,6 +7615,11 @@ function showOrderReadyAlert(order) {
   }
   // Also try vibration on mobile
   if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
+}
+// Ferme la pop-up "commande prete" (et tout calque residuel eventuel)
+function closeOrderReadyAlert() {
+  var el;
+  while ((el = document.getElementById('order-ready-overlay'))) el.remove();
 }
 
 // ══ EXPIRATION DES POINTS ══

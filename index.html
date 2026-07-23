@@ -378,6 +378,10 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
 }
 .admin-tab.active, .admin-tab:hover { border-color: var(--red); color: var(--red); background: rgba(200,35,43,.07); }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; padding: 0 .9rem; }
+.stat-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: .45rem; }
+.stat-grid.cols-3 .stat-card { padding: .7rem .35rem; }
+.stat-grid.cols-3 .stat-val { font-size: 1.25rem; }
+.stat-grid.cols-3 .stat-lbl { font-size: .64rem; white-space: nowrap; }
 .stat-card { background: var(--dark3); border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem; text-align: center; }
 .stat-val { font-family: var(--head); font-size: 1.5rem; font-weight: 800; color: var(--red); }
 .stat-lbl { font-size: .68rem; color: var(--muted); margin-top: .15rem; }
@@ -881,14 +885,11 @@ function startFirebaseListeners() {
     }
     if (isAdmin) {
       // Rafraîchir l'UI admin quel que soit l'écran actuel
-      var ac = document.getElementById('admin-content');
-      var activeTab = document.querySelector('.admin-tab.active');
-      if (ac && activeTab) {
-        if (activeTab.textContent.indexOf('Commandes') >= 0) ac.innerHTML = adminOrders();
-        if (activeTab.textContent.indexOf('Dashboard') >= 0) ac.innerHTML = adminDashboard();
-      } else if (ac && currentScreen === 'profile') {
-        // Aucun onglet actif trouvé - forcer le rendu des commandes
-        ac.innerHTML = adminOrders();
+      // (ecran Commandes du menu du bas OU panneau admin dans Profil)
+      if (!refreshAdminOrdersView()) {
+        var ac = adminContentEl();
+        var activeTab = document.querySelector('.admin-tab.active');
+        if (ac && activeTab && activeTab.textContent.indexOf('Dashboard') >= 0) ac.innerHTML = adminDashboard();
       }
     }
   });
@@ -977,7 +978,7 @@ function startFirebaseListeners() {
         document.body.appendChild(banner2);
         setTimeout(function(){ if(banner2.parentNode) banner2.remove(); }, 10000);
         // Rafraîchir l'UI admin
-        var ac2 = document.getElementById('admin-content');
+        var ac2 = adminContentEl();
         var activeTab2 = document.querySelector('.admin-tab.active');
         if (ac2 && activeTab2 && activeTab2.textContent.indexOf('Commandes') >= 0) {
           ac2.innerHTML = adminOrders();
@@ -3100,12 +3101,41 @@ function showOrderConfirm(order,cfg){
 // ══════════════════════════════════════════════════════
 // ORDERS
 // ══════════════════════════════════════════════════════
+// ── Conteneur admin visible ──
+// Le contenu admin peut vivre a deux endroits : dans l'ecran Profil (panneau
+// complet avec ses onglets) et dans l'ecran Commandes du menu du bas.
+// On rend toujours dans celui qui est affiche, sinon les rafraichissements
+// partent dans un ecran cache et rien ne bouge a l'ecran.
+function adminContentEl() {
+  if (currentScreen === 'orders') {
+    var eo = document.getElementById('admin-content-orders');
+    if (eo) return eo;
+  }
+  return document.getElementById('admin-content');
+}
+// Rafraichit la liste des commandes admin la ou elle est visible.
+function refreshAdminOrdersView() {
+  var ac = adminContentEl();
+  if (!ac) return false;
+  if (currentScreen === 'orders') { ac.innerHTML = adminOrders(); return true; }
+  var at = document.querySelector('.admin-tab.active');
+  if (at && at.textContent.indexOf('Commandes') >= 0) { ac.innerHTML = adminOrders(); return true; }
+  if (!at && currentScreen === 'profile') { ac.innerHTML = adminOrders(); return true; }
+  return false;
+}
+
 function renderOrders(){
   var sc=document.getElementById('s-orders');
   if(!sc) return;
   var user=getCurrentUser();
   if(!user){
     sc.innerHTML=header('Commandes')+'<div class="empty-state"><div class="icon">📦</div><div class="title">Mes commandes</div><p class="text-sm">Connectez-vous pour voir vos commandes</p><button class="btn btn-primary mt-2" onclick="showLogin()">Se connecter</button></div>';
+    return;
+  }
+  // Comptes cote stand : afficher les commandes de la boutique, pas les commandes perso
+  if (user.role==='superadmin'||user.role==='admin'||user.role==='preparateur'||user.role==='entreprise') {
+    sc.innerHTML = header('Commandes')
+      + '<div id="admin-content-orders" style="padding-bottom:5rem">' + adminOrders() + '</div>';
     return;
   }
   var orders=getOrders().filter(function(o){return o.userId===user.id;});
@@ -3745,7 +3775,7 @@ function adminZone(key){
   nav.tab=(z.tabs[0]||{}).t;
   var zb=document.getElementById('admin-zonebar'); if(zb) zb.innerHTML=_adminZoneBarInner();
   var sb=document.getElementById('admin-subbar'); if(sb) sb.innerHTML=_adminSubBarInner();
-  var fn=_adminFns()[nav.tab]; var ac=document.getElementById('admin-content');
+  var fn=_adminFns()[nav.tab]; var ac=adminContentEl();
   if(fn && ac) ac.innerHTML=fn();
 }
 function renderAdmin(role){
@@ -3778,7 +3808,7 @@ function openAnalytics() {
 function adminTab(tab, btn){
   var fns=_adminFns();
   var nav=window._adminNav;
-  var ac=document.getElementById('admin-content');
+  var ac=adminContentEl();
   if(!nav){ if(fns[tab] && ac) ac.innerHTML=fns[tab](); return; }
   var zones=_adminZonesFor(nav.role);
   var zoneKey=nav.zone;
@@ -3903,7 +3933,7 @@ function recoverOrdersFromBackup() {
         try { localStorage.setItem('_ba_ba_orders', JSON.stringify(existing)); } catch(e) {}
         toast('✅ '+allOrders.length+' commandes restaurées !', 'success', 6000);
         // Rafraîchir l'interface
-        var ac = document.getElementById('admin-content');
+        var ac = adminContentEl();
         if (ac) ac.innerHTML = adminOrders();
       }).catch(function(e){ toast('Erreur: '+e.message, 'error'); });
     });
@@ -3973,7 +4003,7 @@ function restoreFromSnapshot() {
       try { localStorage.setItem('_ba_ba_products', JSON.stringify(d.ba_products)); } catch(e) {}
     }
     toast('✅ Restauration terminée — '+restored+' commandes récupérées', 'success', 6000);
-    var ac = document.getElementById('admin-content');
+    var ac = adminContentEl();
     if (ac) ac.innerHTML = adminOrders();
   }).catch(function(e){ toast('Erreur: '+e.message, 'error'); });
 }
@@ -4290,7 +4320,7 @@ function adminPrepa() {
     html += '</div>';
   });
 
-  html += '<button class="btn btn-secondary btn-full mt-2" onclick="document.getElementById(\'admin-content\').innerHTML=adminPrepa()" style="font-size:.8rem">🔄 Actualiser</button>';
+  html += '<button class="btn btn-secondary btn-full mt-2" onclick="adminContentEl().innerHTML=adminPrepa()" style="font-size:.8rem">🔄 Actualiser</button>';
   html += '</div>';
   return html;
 }
@@ -4539,7 +4569,7 @@ function submitManualOrder() {
   _manualCart = [];
   closeModal('m-product');
   toast('Commande N°'+num+' confirmée pour '+prenom+' ! 🌴','success',4000);
-  document.getElementById('admin-content').innerHTML = adminOrders();
+  adminContentEl().innerHTML = adminOrders();
 }
 
 function showManualOrderMsg(order, cfg) {
@@ -4701,7 +4731,7 @@ function markItemDone(orderId, itemIdx) {
     });
   }
   toast('Produit marque pret','success');
-  var _acm = document.getElementById('admin-content');
+  var _acm = adminContentEl();
   if (_acm) {
     var _atm = document.querySelector('.admin-tab.active');
     var _ttm = _atm ? _atm.textContent || '' : '';
@@ -4930,7 +4960,7 @@ function prepFinishOrder(o) {
   notifyOrder(o.userId, '🎉 Prete !', 'Votre commande est prete ! Venez la recuperer.', 'ready', o.id, o.orderNumber, o.pickupTime);
   closeModal('m-product');
   toast('🎉 Commande prête ! Client averti.', 'success', 4000);
-  var ac = document.getElementById('admin-content');
+  var ac = adminContentEl();
   if (ac) ac.innerHTML = adminOrders();
 }
 
@@ -5050,7 +5080,7 @@ function advanceOrder(id) {
       var idx2 = orders.findIndex(function(x) { return x.id === o.id; });
       if (idx2 >= 0) orders[idx2] = o; else orders.push(o);
       try { localStorage.setItem('_ba_ba_orders', JSON.stringify(orders)); } catch(e) {}
-      var ac = document.getElementById('admin-content');
+      var ac = adminContentEl();
       if (ac) ac.innerHTML = adminOrders();
     }).catch(function(e) {
       toast('Erreur: ' + e.message, 'error');
@@ -5134,7 +5164,7 @@ function confirmCancelOrder(id) {
       notify(o.userId, '❌ Commande annulee', 'Votre commande a ete annulee.' + (reason ? ' Raison: ' + reason : ''));
       closeModal('m-product');
       toast('Commande N°' + o.orderNumber + ' annulee', 'info');
-      var ac = document.getElementById('admin-content');
+      var ac = adminContentEl();
       if (ac) ac.innerHTML = adminOrders();
     }).catch(function(e) {
       toast('Erreur: ' + e.message, 'error');
@@ -5180,7 +5210,7 @@ function toggleProd(input){
     toast(p.name+' '+(input.checked?'✅ active':'❌ desactive'),'success');
     // Refresh admin products list
     setTimeout(function(){
-      var ac = document.getElementById('admin-content');
+      var ac = adminContentEl();
       if(ac) ac.innerHTML = adminProducts();
     }, 300);
   }
@@ -5327,7 +5357,7 @@ function saveNewProd(){
   var p=Object.assign({id:genId(),image:_newImg||null},d);
   saveProduct(p); _newImg=null; closeModal('m-product');
   toast('Produit ajoute !','success');
-  document.getElementById('admin-content').innerHTML=adminProducts();
+  adminContentEl().innerHTML=adminProducts();
 }
 function saveEditProd(id){
   try {
@@ -5342,7 +5372,7 @@ function saveEditProd(id){
       _newImg = null;
       closeModal('m-product');
       toast('Produit modifié !', 'success');
-      var ac = document.getElementById('admin-content');
+      var ac = adminContentEl();
       if (ac) ac.innerHTML = adminProducts();
       if (p.cat === 'agoulou') {
         setTimeout(function(){ setAgoulouStock(p.stock, p.ok); }, 100);
@@ -5362,7 +5392,7 @@ function saveEditProd(id){
 function deleteProd(id){
   deleteProduct(id);
   toast('Produit supprime','info');
-  document.getElementById('admin-content').innerHTML=adminProducts();
+  adminContentEl().innerHTML=adminProducts();
 }
 
 function adminStats(period, dateFrom, dateTo){
@@ -5519,7 +5549,7 @@ function applyStatsCustom(){
   var from=(document.getElementById('stats-from')||{}).value||'';
   var to=(document.getElementById('stats-to')||{}).value||'';
   if(!from||!to){toast('Choisissez une date de début et de fin','warning');return;}
-  document.getElementById('admin-content').innerHTML=adminStats('custom',from,to);
+  adminContentEl().innerHTML=adminStats('custom',from,to);
 }
 
 function exportStatsCSV(period, dateFrom, dateTo){
@@ -6106,16 +6136,16 @@ function adminClients(sort) {
     return (now - d.getTime()) < 30*86400000;
   }).length;
   var html = '<div style="padding:0 .9rem 5rem">';
-  html += '<div class="stat-grid" style="margin:.75rem 0">'
+  html += '<div class="stat-grid cols-3" style="margin:.75rem 0;padding:0">'
     + '<div class="stat-card"><div class="stat-val">'+allClients.length+'</div><div class="stat-lbl">Clients</div></div>'
     + '<div class="stat-card"><div class="stat-val">'+actifs30+'</div><div class="stat-lbl">Actifs 30j</div></div>'
     + '<div class="stat-card"><div class="stat-val">'+totalPts+'</div><div class="stat-lbl">Pts total</div></div>'
     + '</div>';
   html += '<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.6rem">'
     + '<span class="text-sm text-muted" style="align-self:center">Trier :</span>'
-    + '<button class="btn btn-sm '+(sort==='inscription'?'btn-primary':'btn-secondary')+'" onclick="document.getElementById(\'admin-content\').innerHTML=adminClients(\'inscription\')">Inscription</button>'
-    + '<button class="btn btn-sm '+(sort==='points'?'btn-primary':'btn-secondary')+'" onclick="document.getElementById(\'admin-content\').innerHTML=adminClients(\'points\')">Points</button>'
-    + '<button class="btn btn-sm '+(sort==='connexion'?'btn-primary':'btn-secondary')+'" onclick="document.getElementById(\'admin-content\').innerHTML=adminClients(\'connexion\')">Connexion</button>'
+    + '<button class="btn btn-sm '+(sort==='inscription'?'btn-primary':'btn-secondary')+'" onclick="adminContentEl().innerHTML=adminClients(\'inscription\')">Inscription</button>'
+    + '<button class="btn btn-sm '+(sort==='points'?'btn-primary':'btn-secondary')+'" onclick="adminContentEl().innerHTML=adminClients(\'points\')">Points</button>'
+    + '<button class="btn btn-sm '+(sort==='connexion'?'btn-primary':'btn-secondary')+'" onclick="adminContentEl().innerHTML=adminClients(\'connexion\')">Connexion</button>'
     + '</div>';
   html += '<div class="form-group" style="margin-bottom:.5rem">'
     + '<input class="form-input" id="client-search2" placeholder="Rechercher un client..." oninput="filterClients2(this.value)" style="background:var(--dark3)"/>'
@@ -6386,13 +6416,13 @@ function savePaliers(){
   updated.sort(function(a,b){return (a.pts||0)-(b.pts||0);});
   save('ba_paliers', updated);
   toast('Paliers enregistres !','success');
-  document.getElementById('admin-content').innerHTML=adminLoyalty();
+  adminContentEl().innerHTML=adminLoyalty();
 }
 function addPalier(){
   var paliers=load('ba_paliers', PALIERS);
   paliers.push({name:'Nouveau',pts:0,icon:'⭐',color:'#ffffff',reward:'',choices:[]});
   save('ba_paliers', paliers);
-  document.getElementById('admin-content').innerHTML=adminLoyalty();
+  adminContentEl().innerHTML=adminLoyalty();
   toast('Palier ajoute','info');
 }
 function delPalier(i){
@@ -6400,7 +6430,7 @@ function delPalier(i){
   if(paliers.length<=1){toast('Gardez au moins 1 palier','warning');return;}
   paliers.splice(parseInt(i),1);
   save('ba_paliers', paliers);
-  document.getElementById('admin-content').innerHTML=adminLoyalty();
+  adminContentEl().innerHTML=adminLoyalty();
   toast('Palier supprime','info');
 }
 function toggleMsgType(val) {
@@ -6577,7 +6607,7 @@ function adjPts(uid){
   var d=parseInt(v); if(isNaN(d)){toast('Invalide','error');return;}
   var u=getUsers().find(function(x){return x.id===uid;});
   if(u){u.points=Math.max(0,(u.points||0)+d);saveUser(u);toast(u.prenom+' : '+u.points+' pts','success');}
-  document.getElementById('admin-content').innerHTML=adminLoyalty();
+  adminContentEl().innerHTML=adminLoyalty();
 }
 function buildSaucesList() {
   var sauces = getSauces();
@@ -6856,7 +6886,7 @@ function toggleOffreMai() {
   save('ba_cfg', cfg);
   db.ref('data/ba_cfg/offreMaiActive').set(cfg.offreMaiActive);
   toast(cfg.offreMaiActive ? '🟡 Affiche activée !' : '⚫ Affiche désactivée', cfg.offreMaiActive ? 'success' : 'info', 2000);
-  document.getElementById('admin-content').innerHTML = adminConfig();
+  adminContentEl().innerHTML = adminConfig();
 }
 
 function toggleMaintenance() {
@@ -6864,7 +6894,7 @@ function toggleMaintenance() {
   cfg.maintenance = !cfg.maintenance;
   save('ba_cfg', cfg);
   toast(cfg.maintenance ? '🔴 Mode maintenance active' : '🟢 Boutique rouverte !', cfg.maintenance?'warning':'success', 4000);
-  document.getElementById('admin-content').innerHTML = adminConfig();
+  adminContentEl().innerHTML = adminConfig();
   if (cfg.maintenance) {
     // Show maintenance on home screen too
     var homeBody = document.getElementById('home-body');
@@ -7401,9 +7431,40 @@ function playPresenceAlert() {
   if (navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
 }
 
+// ── Audio mobile ──
+// Les navigateurs mobiles creent tout AudioContext en etat "suspended" tant que
+// l'utilisateur n'a pas interagi avec la page. L'ancien code creait un nouveau
+// contexte a chaque alerte : sur telephone il restait suspendu = aucun son.
+// On garde donc UN seul contexte, debloque au premier appui sur l'ecran.
+var _baAudioCtx = null;
+function _baGetAudioCtx() {
+  try {
+    if (!_baAudioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      _baAudioCtx = new AC();
+    }
+    if (_baAudioCtx.state === 'suspended' && _baAudioCtx.resume) _baAudioCtx.resume();
+    return _baAudioCtx;
+  } catch(e) { return null; }
+}
+function _baUnlockAudio() {
+  var ctx = _baGetAudioCtx();
+  if (ctx && ctx.state === 'running') {
+    document.removeEventListener('touchstart', _baUnlockAudio);
+    document.removeEventListener('click', _baUnlockAudio);
+    console.log('[BA] Audio debloque');
+  }
+}
+try {
+  document.addEventListener('touchstart', _baUnlockAudio, {passive:true});
+  document.addEventListener('click', _baUnlockAudio);
+} catch(e) {}
+
 function playAdminAlert() {
   try {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = _baGetAudioCtx();
+    if (!ctx) throw new Error('no audio ctx');
     // Triple beep - urgent
     [[880,0,.15],[660,.2,.15],[880,.4,.15],[660,.6,.3]].forEach(function(b){
       var osc = ctx.createOscillator();
@@ -7415,7 +7476,7 @@ function playAdminAlert() {
       osc.start(ctx.currentTime+b[1]);
       osc.stop(ctx.currentTime+b[1]+b[2]+0.05);
     });
-  } catch(e) {}
+  } catch(e) { console.warn('[BA] son indisponible:', e); }
   if (navigator.vibrate) navigator.vibrate([200,100,200]);
 }
 
@@ -7460,15 +7521,12 @@ function startOrderPolling() {
         });
       }
       _lastOrderCount = pendingOrders.length;
-      // Refresh admin orders tab if open
-      if (currentScreen === 'profile') {
-        var ac = document.getElementById('admin-content');
-        if (ac) {
+      // Refresh admin orders tab if open (ecran Commandes ou panneau Profil)
+      if (currentScreen === 'profile' || currentScreen === 'orders') {
+        if (!refreshAdminOrdersView()) {
+          var ac = adminContentEl();
           var activeTab = document.querySelector('.admin-tab.active');
-          if (activeTab && activeTab.textContent.indexOf('Commandes') >= 0) {
-            ac.innerHTML = adminOrders();
-          }
-          if (activeTab && activeTab.textContent.indexOf('Dashboard') >= 0) {
+          if (ac && activeTab && activeTab.textContent.indexOf('Dashboard') >= 0) {
             ac.innerHTML = adminDashboard();
           }
         }
@@ -8232,12 +8290,9 @@ function showClientPresentAlert(update) {
     +'</div>';
   document.body.appendChild(banner);
   setTimeout(function(){ if(banner.parentNode) banner.remove(); }, 10000);
-  // Rafraichir la liste des commandes si elle est affichee
+  // Rafraichir la liste des commandes si elle est affichee (ecran Commandes ou panneau admin)
   try {
-    var ac = document.getElementById('admin-content');
-    var at = document.querySelector('.admin-tab.active');
-    if (ac && at && at.textContent.indexOf('Commandes') >= 0 && typeof adminOrders === 'function') {
-      ac.innerHTML = adminOrders();
+    if (refreshAdminOrdersView()) {
       setTimeout(function(){
         var card = document.getElementById('oc-'+(update&&update.orderId));
         if (card) card.classList.add('presence-flash');

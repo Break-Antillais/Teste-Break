@@ -1111,6 +1111,7 @@ var DEFAULT_CFG = {
   cutoff:'17:00', start:'19:00', end:'22:00',
   address:'37 avenue Lenine, 37700 St-Pierre-des-Corps',
   maxSlot:8, ptsPerEuro:5, signupPts:20,
+  prepDelay:30, // delai mini (minutes) entre la commande et le creneau de retrait
   referralPtsParrain:20, referralPtsFilleul:10, birthdayPts:50,
   bonusOrderThreshold:20, bonusOrderPts:5,
   openDays:[2,3,4,5,6], // 0=dim, 1=lun, 2=mar, 3=mer, 4=jeu, 5=ven, 6=sam
@@ -2705,12 +2706,20 @@ function showCheckout() {
   function buildSlots(date) {
     var slots=getSlots(date,cfg);
     var g='';
+    var anyOk=false;
     slots.forEach(function(s){
-      var slotLabel = s.disabled ? s.time+' (indispo)' : (s.past ? s.time+' (passé)' : s.time);
+      if (s.ok) anyOk=true;
+      var slotLabel = s.disabled ? s.time+' (indispo)' : (s.past ? s.time+' (passé)' : (s.tooSoon ? s.time+' (trop tôt)' : s.time));
       g+='<button class="slot-btn'+(s.ok?'':' full')+'"'
         +(s.ok?' data-t="'+s.time+'" onclick="pickSlot(this)"':' disabled="disabled"')
         +'>'+slotLabel+'</button>';
     });
+    if (slots.length && !anyOk) {
+      var _pd=parseInt(cfg.prepDelay,10); if(isNaN(_pd)||_pd<0) _pd=30;
+      g+='<div style="grid-column:1/-1;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:var(--radius-sm);padding:.7rem .85rem;font-size:.8rem;color:#f59e0b;line-height:1.45">'
+        +'Plus aucun creneau disponible aujourd&apos;hui. Nous avons besoin de '+_pd+' min pour preparer votre commande — choisissez une autre date ci-dessus.'
+        +'</div>';
+    }
     return g;
   }
 
@@ -2781,11 +2790,13 @@ function getSlots(date,cfg) {
   var sh=+sp[0],sm=+sp[1],eh=+ep[0],em=+ep[1];
   var max=cfg.maxSlot||8;
   var orders=getOrders().filter(function(o){return o.pickupDate===date&&o.status!=='cancelled';});
-  // Désactivation auto des créneaux dont l'heure est passée (aujourd'hui uniquement, côté client)
+  // Desactivation auto des creneaux passes ET de ceux trop proches pour etre prepares.
+  // Exemple : commande a 20h15 avec 30 min de preparation -> le creneau 20h30 est refuse.
   var _now=new Date();
   var _todayStr=_now.toISOString().split('T')[0];
   var _nowMin=_now.getHours()*60+_now.getMinutes();
   var _isToday=(date===_todayStr);
+  var _prep=parseInt(cfg.prepDelay,10); if(isNaN(_prep)||_prep<0) _prep=30;
   var slots=[];
   while(sh*60+sm<=eh*60+em){
     var t=(sh<10?'0':'')+sh+':'+(sm<10?'0':'')+sm;
@@ -2795,8 +2806,10 @@ function getSlots(date,cfg) {
       itemCount+=(o.items||[]).reduce(function(s,i){return s+1;},0);
     });
     var disabled = (cfg.disabledSlots||[]).indexOf(t)>=0;
-    var past = _isToday && (sh*60+sm)<=_nowMin;
-    slots.push({time:t,count:itemCount,ok:!disabled&&!past&&itemCount<max,disabled:disabled,past:past});
+    var slotMin = sh*60+sm;
+    var past = _isToday && slotMin<=_nowMin;
+    var tooSoon = _isToday && !past && slotMin < (_nowMin+_prep);
+    slots.push({time:t,count:itemCount,ok:!disabled&&!past&&!tooSoon&&itemCount<max,disabled:disabled,past:past,tooSoon:tooSoon});
     sm+=30; if(sm>=60){sh++;sm-=60;}
   }
   return slots;
@@ -2807,6 +2820,8 @@ function findNextAvailableSlot(date, itemCount, cfg) {
   var slots = getSlots(date, cfg);
   var max = cfg.maxSlot||8;
   for (var i=0; i<slots.length; i++) {
+    // Ne jamais proposer un creneau bloque, passe ou trop proche pour etre prepare
+    if (slots[i].disabled || slots[i].past || slots[i].tooSoon) continue;
     if (slots[i].count + itemCount <= max) return slots[i].time;
   }
   return null;
@@ -7012,6 +7027,8 @@ function adminConfig(){
     +'<div class="form-group"><label class="form-label">Fin retrait</label><input class="form-input" id="cfg-en" type="time" value="'+cfg.end+'"/></div>'
     +'<div class="form-group"><label class="form-label">Adresse</label><input class="form-input" id="cfg-ad" value="'+cfg.address+'"/></div>'
     +'<div class="form-group"><label class="form-label">Max / creneau</label><input class="form-input" id="cfg-ms" type="number" value="'+cfg.maxSlot+'"/></div>'
+    +'<div class="form-group"><label class="form-label">Delai de preparation (min)</label><input class="form-input" id="cfg-pd" type="number" min="0" step="15" value="'+(cfg.prepDelay!==undefined?cfg.prepDelay:30)+'"/>'
+    +'<div class="text-sm text-muted" style="margin-top:.25rem">Temps mini entre la commande et le retrait. A 30, un client qui commande a 20h15 ne peut pas prendre 20h30.</div></div>'
     +'<div class="form-group"><label class="form-label">Points parrain (parrainage)</label><input class="form-input" id="cfg-rp" type="number" value="'+(cfg.referralPtsParrain||100)+'"/></div>'
     +'<div class="form-group"><label class="form-label">Points filleul (parrainage)</label><input class="form-input" id="cfg-rf" type="number" value="'+(cfg.referralPtsFilleul||50)+'"/></div>'
     +'<div class="form-group"><label class="form-label">Points anniversaire</label><input class="form-input" id="cfg-bp" type="number" value="'+(cfg.birthdayPts||50)+'"/></div>'
@@ -7069,6 +7086,8 @@ function saveGenCfg(){
   cfg.end=document.getElementById('cfg-en').value;
   cfg.address=document.getElementById('cfg-ad').value;
   cfg.maxSlot=parseInt(document.getElementById('cfg-ms').value)||8;
+  var _pdEl=document.getElementById('cfg-pd');
+  if(_pdEl){ var _pd=parseInt(_pdEl.value,10); cfg.prepDelay=(isNaN(_pd)||_pd<0)?30:_pd; }
   cfg.referralPtsParrain=parseInt(document.getElementById('cfg-rp').value)||100;
   cfg.referralPtsFilleul=parseInt(document.getElementById('cfg-rf').value)||50;
   cfg.birthdayPts=parseInt(document.getElementById('cfg-bp').value)||50;

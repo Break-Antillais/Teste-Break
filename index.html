@@ -3471,126 +3471,147 @@ function renderProfile(){
   var spent=orders.reduce(function(s,o){return s+o.total;},0);
   var palier=getPalier(pts);
   var _paliers=load('ba_paliers',PALIERS);
-  var nextP=_paliers.filter(function(p){return (p.pts||p.min||0)>pts;}).sort(function(a,b){return (a.pts||a.min||0)-(b.pts||b.min||0);})[0]||null;
-  var curPts=palier.pts||palier.min||0;
-  var nextPts=nextP?(nextP.pts||nextP.min||0):curPts;
-  var progress=nextP?Math.min(100,Math.round((pts-curPts)/(nextPts-curPts)*100)):100;
-  var html=header('Mon Profil')+'<div style="padding:1rem 1rem 5rem">';
-  // Info
-  html+='<div class="card mb-2" style="display:flex;align-items:center;gap:1rem">'
-    +'<div class="avatar" style="width:54px;height:54px;font-size:1.3rem">'+user.prenom[0].toUpperCase()+'</div>'
-    +'<div><div class="font-head fw-800" style="font-size:1.25rem">'+user.prenom+'</div>'
-    +'<div class="text-sm text-muted">'+user.email+'</div>'
-    +'<div class="text-sm text-muted">📱 '+user.phone+'</div></div></div>';
-  // Points
-  // Calculer pts restants avant prochain palier (correction NaN)
-  var nextPSeuil = nextP ? (nextP.pts||nextP.min||0) : 0;
-  var ptsRestants = nextP ? Math.max(0, nextPSeuil - pts) : 0;
-  var curSeuil = palier.pts||palier.min||0;
-  var progressBar = nextP && (nextPSeuil - curSeuil) > 0
-    ? Math.min(100, Math.round((pts - curSeuil) / (nextPSeuil - curSeuil) * 100))
-    : 100;
+  var _sorted=_paliers.slice().sort(function(a,b){return (a.pts||a.min||0)-(b.pts||b.min||0);});
+  var nextP=_sorted.filter(function(p){return (p.pts||p.min||0)>pts;})[0]||null;
+  var curSeuil=palier.pts||palier.min||0;
+  var nextSeuil=nextP?(nextP.pts||nextP.min||0):curSeuil;
+  var ptsRestants=nextP?Math.max(0,nextSeuil-pts):0;
+  var progressBar=nextP&&(nextSeuil-curSeuil)>0?Math.min(100,Math.round((pts-curSeuil)/(nextSeuil-curSeuil)*100)):100;
 
-  html += '<div class="pts-card mb-2" style="position:relative;overflow:hidden">'
-    // Fond décoratif
-    +'<div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:'+palier.color+';opacity:.07"></div>'
-    +'<div style="position:absolute;bottom:-30px;left:-10px;width:80px;height:80px;border-radius:50%;background:'+palier.color+';opacity:.05"></div>'
-    // En-tête
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem">'
-    +'<div>'
-    +'<div style="font-size:.72rem;font-weight:600;letter-spacing:.08em;opacity:.6;text-transform:uppercase;margin-bottom:.3rem">Points fidélité</div>'
-    +'<div style="display:flex;align-items:baseline;gap:.3rem">'
-    +'<div style="font-family:var(--head);font-size:3rem;font-weight:900;line-height:1;color:'+palier.color+'">'+pts+'</div>'
-    +'<div style="font-size:.8rem;opacity:.6;font-weight:600">pts</div>'
+  var html=header('Compte')+'<div style="padding:1rem 1rem 5rem">';
+
+  // Carte membre
+  html+='<div class="card mb-2" style="padding:1rem">'
+    +'<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">'
+    +'<div class="avatar" style="width:46px;height:46px;font-size:1.2rem;flex-shrink:0">'+user.prenom[0].toUpperCase()+'</div>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div class="font-head fw-800" style="font-size:1.15rem">'+user.prenom+'</div>'
+    +'<div class="text-sm text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+user.email+(user.phone?' \u00b7 '+user.phone:'')+'</div>'
+    +'</div>'
+    +'<div style="text-align:center;background:'+palier.color+'1f;border-radius:12px;padding:.4rem .6rem;flex-shrink:0">'
+    +'<div style="font-size:1.3rem;line-height:1">'+palier.icon+'</div>'
+    +'<div style="font-size:.72rem;font-weight:800;color:'+palier.color+';margin-top:.1rem">'+palier.name+'</div>'
     +'</div></div>'
-    +'<div style="text-align:right;background:rgba(255,255,255,.06);border-radius:12px;padding:.5rem .75rem">'
-    +'<div style="font-size:1.8rem;line-height:1">'+palier.icon+'</div>'
-    +'<div style="font-weight:800;font-size:.82rem;color:'+palier.color+';margin-top:.15rem">'+palier.name+'</div>'
-    +'</div></div>'
-    // Barre de progression
-    +(nextP
-      ? ''
-        +'<div style="margin-bottom:.4rem;display:flex;justify-content:space-between;align-items:center">'
-        +'<span style="font-size:.72rem;font-weight:700;opacity:.7">Vers '+nextP.icon+' '+nextP.name+'</span>'
-        +'<span style="font-size:.72rem;font-weight:800;color:'+nextP.color+'">'+ptsRestants+' pts restants</span>'
-        +'</div>'
-        +'<div style="background:rgba(255,255,255,.1);border-radius:100px;height:12px;overflow:hidden">'
-        +'<div style="height:100%;border-radius:100px;width:'+progressBar+'%;'
-        +'background:linear-gradient(90deg,'+palier.color+','+nextP.color+');'
-        +'box-shadow:0 0 8px '+nextP.color+'66;transition:width .6s ease"></div></div>'
-        +'<div style="text-align:center;font-size:.68rem;opacity:.5;margin-top:.25rem">'+progressBar+'% accompli</div>'
-      : '<div style="text-align:center;padding:.3rem 0">'
-        +'<div style="font-size:.78rem;font-weight:700;color:'+palier.color+'">✨ Palier maximum atteint !</div>'
-        +'</div>'
-    )
-    +'</div>';
-  // ── Programme fidélité unifié ──
-  var _palList=load('ba_paliers',PALIERS);
-  html += '<div class="sec-title" style="margin-top:1.25rem">Programme Fidelite</div>';
-  _palList.forEach(function(p){
+    +'<div style="display:flex;align-items:baseline;gap:.4rem;margin-bottom:.9rem">'
+    +'<span style="font-family:var(--head);font-weight:900;font-size:2.2rem;line-height:1">'+pts+'</span>'
+    +'<span class="text-sm text-muted">points fidelite</span></div>';
+  html+='<div style="display:flex;align-items:center;margin-bottom:.85rem">';
+  _sorted.forEach(function(p,i){
+    var unlocked=pts>=(p.pts||p.min||0);
+    html+='<span style="font-size:1.05rem;'+(unlocked?'':'filter:grayscale(1);opacity:.35')+'">'+p.icon+'</span>';
+    if(i<_sorted.length-1){
+      var passed=pts>=(_sorted[i+1].pts||_sorted[i+1].min||0);
+      html+='<div style="flex:1;height:2px;background:'+(passed?palier.color:'rgba(255,255,255,.1)')+';margin:0 .22rem"></div>';
+    }
+  });
+  html+='</div>';
+  if(nextP){
+    html+='<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.35rem">'
+      +'<span class="text-muted">Vers <span style="color:'+nextP.color+'">'+nextP.name+'</span></span>'
+      +'<span style="color:'+nextP.color+';font-weight:800">'+ptsRestants+' pts restants</span></div>'
+      +'<div style="background:rgba(255,255,255,.1);border-radius:100px;height:8px;overflow:hidden">'
+      +'<div style="height:100%;width:'+progressBar+'%;background:'+palier.color+';border-radius:100px;transition:width .6s ease"></div></div>';
+  } else {
+    html+='<div style="text-align:center;font-size:.8rem;font-weight:700;color:'+palier.color+'">\u2728 Palier maximum atteint !</div>';
+  }
+  html+='</div>';
+
+  // Recompenses disponibles
+  var _unlockedRewards=_sorted.filter(function(p){return pts>=(p.pts||p.min||0) && p.choices && p.choices.length>0;});
+  html+='<div class="sec-title" style="margin-top:1.25rem">\uD83C\uDF81 Recompenses disponibles</div>';
+  if(_unlockedRewards.length){
+    _unlockedRewards.forEach(function(p){
+      html+='<div class="card mb-2" style="display:flex;align-items:center;gap:.7rem;background:rgba(45,158,95,.05);border-color:rgba(45,158,95,.3);padding:.7rem .85rem">'
+        +'<span style="font-size:1.5rem">'+p.icon+'</span>'
+        +'<div style="flex:1;min-width:0"><div class="fw-700" style="font-size:.9rem">Palier '+p.name+'</div>'
+        +'<div style="font-size:.75rem;color:#2d9e5f">'+(p.reward||'1 produit offert au choix')+'</div></div>'
+        +'<button class="btn btn-primary btn-sm" data-palier="'+p.name+'" onclick="addRewardToCartByPalier(this.dataset.palier)" style="white-space:nowrap">Utiliser</button>'
+        +'</div>';
+    });
+  } else {
+    html+='<div class="card mb-2" style="text-align:center;color:var(--muted);font-size:.82rem">Cumulez des points pour debloquer vos premieres recompenses \uD83C\uDFAF</div>';
+  }
+
+  // Prochain palier
+  if(nextP){
+    var _ch=(nextP.choices||[]);
+    html+='<div class="sec-title" style="margin-top:1.25rem">Prochain palier</div>'
+      +'<div class="card mb-2" style="padding:.8rem .9rem">'
+      +'<div style="display:flex;align-items:center;gap:.5rem'+(_ch.length?';margin-bottom:.6rem':'')+'">'
+      +'<span style="font-size:1.3rem">'+nextP.icon+'</span>'
+      +'<span class="fw-700">'+nextP.name+'</span>'
+      +'<span class="text-sm text-muted">\u00b7 '+nextSeuil+' pts</span>'
+      +'<span style="margin-left:auto;font-size:.72rem;color:'+nextP.color+';background:'+nextP.color+'1f;border-radius:100px;padding:.15rem .6rem;font-weight:700">\u2212'+ptsRestants+' pts</span>'
+      +'</div>';
+    if(_ch.length){
+      html+='<div style="display:flex;flex-wrap:wrap;gap:.3rem">';
+      _ch.slice(0,3).forEach(function(c){ html+='<span style="font-size:.72rem;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:100px;padding:.15rem .55rem">'+c+'</span>'; });
+      if(_ch.length>3) html+='<span style="font-size:.72rem;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:100px;padding:.15rem .55rem">+'+(_ch.length-3)+'</span>';
+      html+='</div>';
+    }
+    html+='</div>';
+  }
+
+  // Voir tous les paliers (detail complet, deplie)
+  html+='<button class="btn btn-secondary btn-full" style="font-size:.82rem" onclick="var e=document.getElementById(&apos;all-paliers&apos;);var o=e.style.display===&apos;none&apos;;e.style.display=o?&apos;block&apos;:&apos;none&apos;;this.innerHTML=o?&apos;Masquer les paliers \u25b2&apos;:&apos;Voir tous les paliers \u25bc&apos;">Voir tous les paliers \u25bc</button>';
+  html+='<div id="all-paliers" style="display:none;margin-top:.75rem">';
+  _sorted.forEach(function(p){
     var pSeuil  = p.pts||p.min||0;
     var active  = palier.name===p.name;
     var unlocked= pts >= pSeuil;
     var hasReward = p.choices && p.choices.length > 0;
     var choices = p.choices||[];
     var ptsManquants = Math.max(0, pSeuil - pts);
-
-    // Couleurs selon état
     var borderColor = active ? 'var(--red)' : unlocked && hasReward ? 'rgba(45,158,95,.4)' : 'var(--border)';
     var bgColor     = active ? 'rgba(200,35,43,.07)' : unlocked ? 'rgba(45,158,95,.04)' : 'var(--dark3)';
-
-    html += '<div style="border:1.5px solid '+borderColor+';background:'+bgColor+';border-radius:var(--radius-sm);margin-bottom:.5rem;overflow:hidden">';
-
-    // ── En-tête palier ──
+    html += '<div style="border:1px solid '+borderColor+';background:'+bgColor+';border-radius:var(--radius-sm);margin-bottom:.5rem;overflow:hidden">';
     html += '<div style="display:flex;align-items:center;gap:.65rem;padding:.75rem .9rem">';
     html += '<span style="font-size:1.4rem'+(unlocked?'':';filter:grayscale(1);opacity:.5')+'">' + p.icon + '</span>';
     html += '<div style="flex:1">';
     html += '<div class="fw-700" style="color:' + (unlocked?p.color:'var(--muted)') + '">' + p.name + '</div>';
     if (pSeuil > 0) {
       html += '<div style="font-size:.72rem;color:var(--muted)">';
-      html += unlocked ? '<span style="color:#2d9e5f">✓ Débloqué</span>' : pSeuil + ' pts pour débloquer';
+      html += unlocked ? '<span style="color:#2d9e5f">\u2713 Debloque</span>' : pSeuil + ' pts pour debloquer';
       html += '</div>';
     } else {
-      html += '<div style="font-size:.72rem;color:#cd7f32">Palier de départ</div>';
+      html += '<div style="font-size:.72rem;color:#cd7f32">Palier de depart</div>';
     }
     html += '</div>';
-    // Badge pts manquants ou bouton choisir
     if (unlocked && hasReward) {
-      html += '<button class="btn btn-primary btn-sm" data-palier="'+p.name+'" onclick="addRewardToCartByPalier(this.dataset.palier)" style="font-size:.78rem;padding:.35rem .7rem;white-space:nowrap">🎁 Utiliser</button>';
+      html += '<button class="btn btn-primary btn-sm" data-palier="'+p.name+'" onclick="addRewardToCartByPalier(this.dataset.palier)" style="font-size:.78rem;padding:.35rem .7rem;white-space:nowrap">\uD83C\uDF81 Utiliser</button>';
     } else if (!unlocked && pSeuil > 0) {
       html += '<span style="background:rgba(255,255,255,.07);border-radius:100px;padding:.2rem .6rem;font-size:.72rem;color:var(--muted);font-weight:700;white-space:nowrap">-' + ptsManquants + ' pts</span>';
     }
     html += '</div>';
-
-    // ── Produits disponibles ──
     if (hasReward && choices.length) {
-      html += '<div style="padding:.0rem .9rem .75rem .9rem">';
+      html += '<div style="padding:0 .9rem .75rem .9rem">';
       html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em">Produits offerts :</div>';
       html += '<div style="display:flex;flex-wrap:wrap;gap:.3rem">';
       choices.forEach(function(ch){
         if (unlocked) {
           html += '<span style="background:rgba(45,158,95,.12);border:1px solid rgba(45,158,95,.3);color:#2d9e5f;border-radius:100px;font-size:.72rem;padding:.2rem .6rem">'+ch+'</span>';
         } else {
-          html += '<span style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:100px;font-size:.72rem;padding:.2rem .6rem;filter:blur(0px)">'+ch+'</span>';
+          html += '<span style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:100px;font-size:.72rem;padding:.2rem .6rem">'+ch+'</span>';
         }
       });
       html += '</div>';
       if (!unlocked) {
-        html += '<div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;font-style:italic">Atteignez '+pSeuil+' pts pour débloquer ces récompenses.</div>';
+        html += '<div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;font-style:italic">Atteignez '+pSeuil+' pts pour debloquer ces recompenses.</div>';
       }
       html += '</div>';
     }
-
     html += '</div>';
   });
+  html+='</div>';
 
-  html+='<div class="text-sm text-muted text-center mt-2 mb-3">1€ depense = '+(cfg.ptsPerEuro||5)+' points &bull; '+(cfg.signupPts||50)+' pts offerts a l&apos;inscription</div>';
-  // Carte fidélité QR
-  html += '<div class="sec-title" style="margin-top:1.25rem">🎫 Ma carte fidélité</div>'
+  html+='<div class="text-sm text-muted text-center mt-2 mb-3">1\u20ac depense = '+(cfg.ptsPerEuro||5)+' points &bull; '+(cfg.signupPts||50)+' pts offerts a l&apos;inscription</div>';
+
+  // Carte fidelite QR
+  html += '<div class="sec-title" style="margin-top:1.25rem">\uD83C\uDFAB Ma carte fidelite</div>'
     +'<div class="card mb-2" style="text-align:center">'
     +'<p class="text-sm text-muted mb-2">Presentez ce QR code au stand pour etre identifie rapidement</p>'
     +'<div style="display:flex;justify-content:center"><div id="client-qr-'+user.id+'" style="background:#fff;padding:.75rem;border-radius:12px;display:inline-block"></div></div>'
-    +'<div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">'+user.prenom+' — '+user.referralCode+'</div>'
+    +'<div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">'+user.prenom+' \u2014 '+user.referralCode+'</div>'
     +'</div>';
   setTimeout(function(){
     var el=document.getElementById('client-qr-'+user.id);
@@ -3598,20 +3619,21 @@ function renderProfile(){
   },300);
 
   html += getReferralSection(user);
-  html += '<div class="sec-title" style="margin-top:1.25rem">Code promo</div>';
-  html += '<div class="card mb-2">'
-    + '<p class="text-sm text-muted mb-2">Un code promo ? Entrez-le ici pour gagner des points !</p>'
-    + '<div style="display:flex;gap:.5rem">'
+
+  // Mes codes (promo + marche regroupes)
+  html += '<div class="sec-title" style="margin-top:1.25rem">Mes codes</div>'
+    + '<div class="card mb-2">'
+    + '<div class="text-sm text-muted mb-1">Code promo</div>'
+    + '<div style="display:flex;gap:.5rem;margin-bottom:.85rem">'
     + '<input class="form-input" id="promo-code-input" placeholder="Ex: NOEL2025" style="flex:1;text-transform:uppercase;letter-spacing:.05em"/>'
     + '<button class="btn btn-primary btn-sm" onclick="redeemPromoCode(document.getElementById(&apos;promo-code-input&apos;).value)">OK</button>'
-    + '</div></div>';
-  html += '<div class="sec-title" style="margin-top:1.25rem">Code marche</div>';
-  html += '<div class="card mb-2">'
-    + '<p class="text-sm text-muted mb-2">Achete sur notre stand ? Entrez votre code pour gagner des points !</p>'
+    + '</div>'
+    + '<div class="text-sm text-muted mb-1">Code marche</div>'
     + '<div style="display:flex;gap:.5rem">'
     + '<input class="form-input" id="market-code-input" placeholder="Ex: BA-XXXX-XXXX" style="flex:1;text-transform:uppercase;letter-spacing:.05em"/>'
     + '<button class="btn btn-primary btn-sm" onclick="redeemMarketCodeFromInput()">Valider</button>'
     + '</div></div>';
+
   html+='<div class="divider"></div>';
   html+='<button class="btn btn-danger btn-full mt-1" onclick="doLogout()">Se deconnecter</button>';
   html+='</div>';

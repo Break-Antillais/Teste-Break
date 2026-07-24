@@ -5282,22 +5282,53 @@ function toggleProd(input){
     }, 300);
   }
 }
+// Libelles lisibles des categories dans le formulaire produit
+var PROD_CAT_LABELS = {
+  bokit:'🫓 Bokit', agoulou:'🌯 Agoulou', crepe_salee:'🥞 Crêpe Salée',
+  crepe_sucree:'🍫 Crêpe Sucrée', mini_bokit:'📦 Box Mini Bokit',
+  enfant:'🧒 Menu Enfant', enfant_agoulou:'🌯🧒 Menu Enfant Agoulou', boisson:'🥤 Boisson'
+};
+// Champ stock, reconstruit a chaque changement de categorie.
+// Avant, il etait fige a l'ouverture de la fiche : passer un produit en
+// "Menu Enfant Agoulou" ne faisait pas apparaitre le champ, et l'enregistrement
+// remettait le stock a "illimite".
+function prodStockField(cat, stock, stockAlert) {
+  var withStock = ['boisson','agoulou','enfant_agoulou','mini_bokit','enfant'];
+  if (cat && withStock.indexOf(cat) < 0) {
+    return '<div class="text-sm text-muted" style="margin:-.35rem 0 .85rem">Stock non gere pour cette categorie (prepare a la commande).</div>';
+  }
+  var label = cat==='agoulou' ? '📦 Stock pains agoulou (partagé entre les 3 variantes)'
+            : cat==='enfant_agoulou' ? '🌯🧒 Stock mini agoulou (partagé entre les menus enfant agoulou)'
+            : 'Stock (laisser vide = illimité)';
+  return '<div class="form-group"><label class="form-label">'+label+'</label>'
+    +'<div style="display:flex;gap:.5rem">'
+    +'<input class="form-input" id="pf-stock" type="number" min="0" placeholder="Ex: 24" value="'+(stock!==null&&stock!==undefined?stock:'')+'" style="flex:2"/>'
+    +'<input class="form-input" id="pf-stock-alert" type="number" min="0" placeholder="Alerte à" value="'+(stockAlert||3)+'" style="flex:1"/>'
+    +'</div><div class="text-sm text-muted">Seuil d&apos;alerte (défaut: 3)</div></div>';
+}
+// Rebuild du champ stock quand la categorie change, en conservant la saisie
+function onProdCatChange() {
+  var wrap = document.getElementById('pf-stock-wrap');
+  var sel = document.getElementById('pf-c');
+  if (!wrap || !sel) return;
+  var cur = document.getElementById('pf-stock');
+  var curAlert = document.getElementById('pf-stock-alert');
+  var v = (cur && cur.value !== '') ? parseInt(cur.value,10) : null;
+  var a = (curAlert && curAlert.value !== '') ? parseInt(curAlert.value,10) : 3;
+  wrap.innerHTML = prodStockField(sel.value, v, a);
+}
 function prodForm(p){
   p=p||{};
   var cats=['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','enfant_agoulou','boisson'];
   var html='<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="pf-n" value="'+(p.name||'')+'"/></div>'
-    +'<div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="pf-c">';
-  cats.forEach(function(c){html+='<option value="'+c+'"'+(p.cat===c?' selected':'')+'>'+c+'</option>';});
+    +'<div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="pf-c" onchange="onProdCatChange()">';
+  cats.forEach(function(c){html+='<option value="'+c+'"'+(p.cat===c?' selected':'')+'>'+(PROD_CAT_LABELS[c]||c)+'</option>';});
   html+='</select></div>'
     +'<div class="form-group"><label class="form-label">Prix (€) <span class="text-muted text-sm">— non utilise pour Bokit Classique</span></label>'
     +'<input class="form-input" id="pf-p" type="number" step="0.01" value="'+(p.price||'')+'"/></div>'
     +'<div class="form-group"><label class="form-label">Description</label><input class="form-input" id="pf-d" value="'+(p.desc||'')+'"/></div>'
     +'<div class="form-group"><label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="pf-ok"'+(p.ok?' checked':'')+' style="accent-color:var(--red)"> Disponible</label></div>'
-  +(p.cat==='boisson'||p.cat==='agoulou'||p.cat==='enfant_agoulou'||p.cat==='mini_bokit'||!p.cat?'<div class="form-group"><label class="form-label">'+(p.cat==='agoulou'?'📦 Stock pains agoulou (partagé entre toutes les variantes)':p.cat==='enfant_agoulou'?'🌯🧒 Stock Menu Enfant Agoulou':'Stock (laisser vide = illimité)')+'</label>'
-    +'<div style="display:flex;gap:.5rem">'
-    +'<input class="form-input" id="pf-stock" type="number" min="0" placeholder="Ex: 24" value="'+(p.stock!==null&&p.stock!==undefined?p.stock:'')+'" style="flex:2"/>'
-    +'<input class="form-input" id="pf-stock-alert" type="number" min="0" placeholder="Alerte à" value="'+(p.stockAlert||3)+'" style="flex:1"/>'
-    +'</div><div class="text-sm text-muted">Seuil d&apos;alerte (défaut: 3)</div></div>':'')
+  +'<div id="pf-stock-wrap">'+prodStockField(p.cat, p.stock, p.stockAlert)+'</div>'
     +'<div class="form-group"><label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="pf-soon"'+(p.soon?' checked':'')+' style="accent-color:var(--red)"> Prochainement</label></div>'
   +'<div class="form-group"><label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="pf-feat"'+(p.featured?' checked':'')+' style="accent-color:var(--gold)"> ⭐ Coup de coeur (mis en avant)</label></div>'
     +(p.cat==='mini_bokit' ? '<div style="margin-top:.35rem;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.5rem .75rem">'
@@ -5425,6 +5456,10 @@ function saveNewProd(){
   saveProduct(p); _newImg=null; closeModal('m-product');
   toast('Produit ajoute !','success');
   adminContentEl().innerHTML=adminProducts();
+  // Categorie a stock partage : propager sur toute la categorie
+  if (SHARED_STOCK_CATS[p.cat]) {
+    setTimeout(function(){ setGroupStock(p.cat, p.stock, p.ok); }, 100);
+  }
 }
 function saveEditProd(id){
   try {

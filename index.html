@@ -1425,12 +1425,17 @@ function getPalier(pts) {
 // UI HELPERS
 // ══════════════════════════════════════════════════════
 function toast(msg, type, dur) {
-  var wrap = document.getElementById('toasts');
-  var el = document.createElement('div');
-  el.className = 'toast toast-' + (type||'info');
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(function(){ if(el.parentNode) el.remove(); }, dur||3200);
+  // Defensif : un toast qui echoue ne doit JAMAIS interrompre la fonction
+  // appelante (sinon la fermeture de modale qui suit n'est jamais atteinte).
+  try {
+    var wrap = document.getElementById('toasts');
+    if (!wrap) { console.log('[toast]', msg); return; }
+    var el = document.createElement('div');
+    el.className = 'toast toast-' + (type||'info');
+    el.textContent = msg;
+    wrap.appendChild(el);
+    setTimeout(function(){ if(el.parentNode) el.remove(); }, dur||3200);
+  } catch(e) { console.warn('[toast]', msg, e); }
 }
 function closeModal(id) {
   var el = document.getElementById(id||'m-product');
@@ -3155,6 +3160,12 @@ function adminContentEl() {
   return document.getElementById('admin-content');
 }
 // Rafraichit la liste des commandes admin la ou elle est visible.
+function setAdminContent(html) {
+  // Ecrit dans le conteneur admin visible s'il existe. Ne jette jamais.
+  var ac = adminContentEl();
+  if (ac) ac.innerHTML = html;
+  return !!ac;
+}
 function refreshAdminOrdersView() {
   var ac = adminContentEl();
   if (!ac) return false;
@@ -4362,7 +4373,7 @@ function adminPrepa() {
     html += '</div>';
   });
 
-  html += '<button class="btn btn-secondary btn-full mt-2" onclick="adminContentEl().innerHTML=adminPrepa()" style="font-size:.8rem">🔄 Actualiser</button>';
+  html += '<button class="btn btn-secondary btn-full mt-2" onclick="setAdminContent(adminPrepa())" style="font-size:.8rem">🔄 Actualiser</button>';
   html += '</div>';
   return html;
 }
@@ -4552,7 +4563,9 @@ function moUnselectClient() {
   if (selEl) selEl.style.display = 'none';
 }
 
+var _manualSubmitting = false;
 function submitManualOrder() {
+  if (_manualSubmitting) return; // anti double-clic
   _manualOrderData.prenom = (document.getElementById('mo-prenom')||{}).value || _manualOrderData.prenom;
   _manualOrderData.phone  = (document.getElementById('mo-phone')||{}).value  || _manualOrderData.phone;
   _manualOrderData.email  = (document.getElementById('mo-email')||{}).value  || _manualOrderData.email || '';
@@ -4563,6 +4576,7 @@ function submitManualOrder() {
   if (!prenom) { toast('Entrez le prénom du client','warning'); return; }
   if (!slot)   { toast('Choisissez un créneau','warning'); return; }
   if (!_manualCart.length) { toast('Ajoutez au moins un produit','warning'); return; }
+  _manualSubmitting = true;
   var cfg    = getCfg();
   var orders = getOrders();
   var num    = String(orders.length+1).padStart(4,'0');
@@ -4583,14 +4597,10 @@ function submitManualOrder() {
   try {
     saveOrder(order);
   } catch(saveErr) {
-    btnReset(confirmBtn);
-    if(confirmBtn) confirmBtn._loading = false;
-    toast('❌ Erreur réseau, votre commande n\'a pas pu être prise en compte. Veuillez réessayer ou nous contacter via WhatsApp.', 'error', 8000);
+    _manualSubmitting = false;
+    toast('❌ Erreur réseau, la commande n\'a pas pu être enregistrée. Réessayez.', 'error', 8000);
     return;
   }
-  // Réactiver le bouton (commande OK)
-  btnReset(confirmBtn);
-  if(confirmBtn) confirmBtn._loading = false;
   // Envoyer email si disponible
   if (email) {
     var emailUser = {prenom: prenom, email: email};
@@ -4609,9 +4619,11 @@ function submitManualOrder() {
   _manualOrderMode = false;
   _manualOrderData.linkedUserId = null;
   _manualCart = [];
+  _manualSubmitting = false;
   closeModal('m-product');
   toast('Commande N°'+num+' confirmée pour '+prenom+' ! 🌴','success',4000);
-  adminContentEl().innerHTML = adminOrders();
+  var _ac = adminContentEl();
+  if (_ac) _ac.innerHTML = adminOrders();
 }
 
 function showManualOrderMsg(order, cfg) {
@@ -5455,7 +5467,7 @@ function saveNewProd(){
   var p=Object.assign({id:genId(),image:_newImg||null},d);
   saveProduct(p); _newImg=null; closeModal('m-product');
   toast('Produit ajoute !','success');
-  adminContentEl().innerHTML=adminProducts();
+  setAdminContent(adminProducts());
   // Categorie a stock partage : propager sur toute la categorie
   if (SHARED_STOCK_CATS[p.cat]) {
     setTimeout(function(){ setGroupStock(p.cat, p.stock, p.ok); }, 100);
@@ -5494,7 +5506,7 @@ function saveEditProd(id){
 function deleteProd(id){
   deleteProduct(id);
   toast('Produit supprime','info');
-  adminContentEl().innerHTML=adminProducts();
+  setAdminContent(adminProducts());
 }
 
 function adminStats(period, dateFrom, dateTo){
@@ -5651,7 +5663,7 @@ function applyStatsCustom(){
   var from=(document.getElementById('stats-from')||{}).value||'';
   var to=(document.getElementById('stats-to')||{}).value||'';
   if(!from||!to){toast('Choisissez une date de début et de fin','warning');return;}
-  adminContentEl().innerHTML=adminStats('custom',from,to);
+  setAdminContent(adminStats('custom',from,to));
 }
 
 function exportStatsCSV(period, dateFrom, dateTo){
@@ -6245,9 +6257,9 @@ function adminClients(sort) {
     + '</div>';
   html += '<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.6rem">'
     + '<span class="text-sm text-muted" style="align-self:center">Trier :</span>'
-    + '<button class="btn btn-sm '+(sort==='inscription'?'btn-primary':'btn-secondary')+'" onclick="adminContentEl().innerHTML=adminClients(\'inscription\')">Inscription</button>'
-    + '<button class="btn btn-sm '+(sort==='points'?'btn-primary':'btn-secondary')+'" onclick="adminContentEl().innerHTML=adminClients(\'points\')">Points</button>'
-    + '<button class="btn btn-sm '+(sort==='connexion'?'btn-primary':'btn-secondary')+'" onclick="adminContentEl().innerHTML=adminClients(\'connexion\')">Connexion</button>'
+    + '<button class="btn btn-sm '+(sort==='inscription'?'btn-primary':'btn-secondary')+'" onclick="setAdminContent(adminClients(\'inscription\'))">Inscription</button>'
+    + '<button class="btn btn-sm '+(sort==='points'?'btn-primary':'btn-secondary')+'" onclick="setAdminContent(adminClients(\'points\'))">Points</button>'
+    + '<button class="btn btn-sm '+(sort==='connexion'?'btn-primary':'btn-secondary')+'" onclick="setAdminContent(adminClients(\'connexion\'))">Connexion</button>'
     + '</div>';
   html += '<div class="form-group" style="margin-bottom:.5rem">'
     + '<input class="form-input" id="client-search2" placeholder="Rechercher un client..." oninput="filterClients2(this.value)" style="background:var(--dark3)"/>'
@@ -6518,13 +6530,13 @@ function savePaliers(){
   updated.sort(function(a,b){return (a.pts||0)-(b.pts||0);});
   save('ba_paliers', updated);
   toast('Paliers enregistres !','success');
-  adminContentEl().innerHTML=adminLoyalty();
+  setAdminContent(adminLoyalty());
 }
 function addPalier(){
   var paliers=load('ba_paliers', PALIERS);
   paliers.push({name:'Nouveau',pts:0,icon:'⭐',color:'#ffffff',reward:'',choices:[]});
   save('ba_paliers', paliers);
-  adminContentEl().innerHTML=adminLoyalty();
+  setAdminContent(adminLoyalty());
   toast('Palier ajoute','info');
 }
 function delPalier(i){
@@ -6532,7 +6544,7 @@ function delPalier(i){
   if(paliers.length<=1){toast('Gardez au moins 1 palier','warning');return;}
   paliers.splice(parseInt(i),1);
   save('ba_paliers', paliers);
-  adminContentEl().innerHTML=adminLoyalty();
+  setAdminContent(adminLoyalty());
   toast('Palier supprime','info');
 }
 function toggleMsgType(val) {
@@ -6709,7 +6721,7 @@ function adjPts(uid){
   var d=parseInt(v); if(isNaN(d)){toast('Invalide','error');return;}
   var u=getUsers().find(function(x){return x.id===uid;});
   if(u){u.points=Math.max(0,(u.points||0)+d);saveUser(u);toast(u.prenom+' : '+u.points+' pts','success');}
-  adminContentEl().innerHTML=adminLoyalty();
+  setAdminContent(adminLoyalty());
 }
 function buildSaucesList() {
   var sauces = getSauces();
@@ -6988,7 +7000,7 @@ function toggleOffreMai() {
   save('ba_cfg', cfg);
   db.ref('data/ba_cfg/offreMaiActive').set(cfg.offreMaiActive);
   toast(cfg.offreMaiActive ? '🟡 Affiche activée !' : '⚫ Affiche désactivée', cfg.offreMaiActive ? 'success' : 'info', 2000);
-  adminContentEl().innerHTML = adminConfig();
+  setAdminContent(adminConfig());
 }
 
 function toggleMaintenance() {
@@ -6996,7 +7008,7 @@ function toggleMaintenance() {
   cfg.maintenance = !cfg.maintenance;
   save('ba_cfg', cfg);
   toast(cfg.maintenance ? '🔴 Mode maintenance active' : '🟢 Boutique rouverte !', cfg.maintenance?'warning':'success', 4000);
-  adminContentEl().innerHTML = adminConfig();
+  setAdminContent(adminConfig());
   if (cfg.maintenance) {
     // Show maintenance on home screen too
     var homeBody = document.getElementById('home-body');

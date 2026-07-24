@@ -732,28 +732,31 @@ function startFirebaseListeners() {
 
   // Real-time orders sync - with status change detection
   // Listener viandes temps réel — met à jour les chips si la modale est ouverte
-  // Listener stock agoulou centralisé
-  db.ref('data/ba_agoulou_stock').on('value', function(snap){
-    var v = snap.val();
-    if (!v && v !== 0) return;
-    var st = (typeof v === 'object') ? v.stock : v;
-    var ok = (typeof v === 'object') ? v.ok : (st > 0);
-    save('ba_agoulou_stock', st);
-    // Mettre à jour tous les agoulou en local
-    var prods = load('ba_products', []);
-    if (!Array.isArray(prods)) prods = Object.values(prods);
-    var changed = false;
-    prods.forEach(function(p){
-      if (p && p.cat === 'agoulou') {
-        p.stock = st;
-        p.ok = ok && (st === null || st > 0);
-        changed = true;
+  // Listener stocks partages (agoulou + menu enfant agoulou)
+  Object.keys(SHARED_STOCK_CATS).forEach(function(cat){
+    var key = SHARED_STOCK_CATS[cat];
+    db.ref('data/'+key).on('value', function(snap){
+      var v = snap.val();
+      if (!v && v !== 0) return;
+      var st = (typeof v === 'object') ? v.stock : v;
+      var ok = (typeof v === 'object') ? v.ok : (st > 0);
+      save(key, st);
+      // Mettre a jour tous les produits de la categorie en local
+      var prods = load('ba_products', []);
+      if (!Array.isArray(prods)) prods = Object.values(prods);
+      var changed = false;
+      prods.forEach(function(p){
+        if (p && p.cat === cat) {
+          p.stock = st;
+          p.ok = ok && (st === null || st > 0);
+          changed = true;
+        }
+      });
+      if (changed) {
+        try { localStorage.setItem('_ba_ba_products', JSON.stringify(prods)); } catch(e){}
+        if (typeof renderHome === 'function' && document.getElementById('home-body')) renderHome();
       }
     });
-    if (changed) {
-      try { localStorage.setItem('_ba_ba_products', JSON.stringify(prods)); } catch(e){}
-      if (typeof renderHome === 'function' && document.getElementById('home-body')) renderHome();
-    }
   });
 
   db.ref('data/ba_meats').on('value', function(snap){
@@ -1047,7 +1050,7 @@ function getAvailableMeats() {
 var MEATS = DEFAULT_MEATS.map(function(m){ return m.name; });
 var MEAT_PRICES = {};
 DEFAULT_MEATS.forEach(function(m){ MEAT_PRICES[m.name] = m.price; });
-var EMOJI = {bokit:'🫓',crepe_salee:'🥞',crepe_sucree:'🍫',agoulou:'🌯',boisson:'🥤',mini_bokit:'📦',enfant:'🧒'};
+var EMOJI = {bokit:'🫓',crepe_salee:'🥞',crepe_sucree:'🍫',agoulou:'🌯',boisson:'🥤',mini_bokit:'📦',enfant:'🧒',enfant_agoulou:'🌯'};
 var MINI_SAVEURS = ['Poulet','Thon','Steak','Jambon Fromage','Saucisse Fromage'];
 var STATUTS = {
   pending:   {label:'En attente',    icon:'⏳', color:'#f59e0b'},
@@ -1244,22 +1247,33 @@ function saveOrder(order) {
   // Déclencher snapshot différé (sans bloquer)
   setTimeout(function(){ if (typeof snapshotAll === 'function') snapshotAll(); }, 3000);
 }
-// ── Stock Agoulou centralisé ──
-function getAgoulouStock() {
-  var v = load('ba_agoulou_stock', null);
+// ── Stocks partages par categorie ──
+// Certaines categories puisent dans le meme stock physique : les 3 agoulous
+// partagent les memes pains, et les menus enfant agoulou les mini pains.
+// Le stock vit dans un noeud Firebase dedie (avec listener) pour que TOUS les
+// appareils se synchronisent, y compris apres une commande passee par un client.
+var SHARED_STOCK_CATS = {
+  agoulou: 'ba_agoulou_stock',
+  enfant_agoulou: 'ba_enfant_agoulou_stock'
+};
+function getGroupStock(cat) {
+  var key = SHARED_STOCK_CATS[cat];
+  if (!key) return null;
+  var v = load(key, null);
   if (v !== null && v !== undefined) return v;
-  // Fallback : lire sur le premier agoulou
+  // Fallback : lire sur le premier produit de la categorie
   var prods = load('ba_products', []);
   if (!Array.isArray(prods)) prods = Object.values(prods);
-  var a = prods.find(function(p){ return p && p.cat === 'agoulou' && p.stock !== null && p.stock !== undefined; });
+  var a = prods.find(function(p){ return p && p.cat === cat && p.stock !== null && p.stock !== undefined; });
   return a ? a.stock : null;
 }
-
-function setAgoulouStock(stock, okVal) {
-  save('ba_agoulou_stock', stock);
-  db.ref('data/ba_agoulou_stock').set({stock: stock, ok: okVal !== false});
-  // Propager sur tous les produits agoulou
-  var prods = getProducts().filter(function(p){ return p.cat === 'agoulou'; });
+function setGroupStock(cat, stock, okVal) {
+  var key = SHARED_STOCK_CATS[cat];
+  if (!key) return;
+  save(key, stock);
+  db.ref('data/'+key).set({stock: stock, ok: okVal !== false});
+  // Propager sur tous les produits de la categorie
+  var prods = getProducts().filter(function(p){ return p.cat === cat; });
   prods.forEach(function(p) {
     p.stock = stock;
     p.ok = (stock === null || stock > 0) && (okVal !== false);
@@ -1268,6 +1282,9 @@ function setAgoulouStock(stock, okVal) {
   });
   renderHome();
 }
+// Compat : anciens appels
+function getAgoulouStock() { return getGroupStock('agoulou'); }
+function setAgoulouStock(stock, okVal) { return setGroupStock('agoulou', stock, okVal); }
 
 
 function saveProduct(p) {
@@ -1957,7 +1974,7 @@ function renderHome() {
 
   var cats = [];
   if(hasFeatured) cats.push({k:'featured',l:'⭐ Top'});
-  cats = cats.concat([{k:'bokit',l:'🫓 Bokits'},{k:'agoulou',l:'🌯 Agoulou'},{k:'crepe_salee',l:'🥞 Crepes Salee'},{k:'crepe_sucree',l:'🍫 Crepes Sucree'},{k:'mini_bokit',l:'📦 Box Mini'},{k:'enfant',l:'🧒 Enfants'},{k:'boisson',l:'🥤 Boissons'}]);
+  cats = cats.concat([{k:'bokit',l:'🫓 Bokits'},{k:'agoulou',l:'🌯 Agoulou'},{k:'crepe_salee',l:'🥞 Crepes Salee'},{k:'crepe_sucree',l:'🍫 Crepes Sucree'},{k:'mini_bokit',l:'📦 Box Mini'},{k:'enfant',l:'🧒 Enfants'},{k:'enfant_agoulou',l:'🌯🧒 Enfant Agoulou'},{k:'boisson',l:'🥤 Boissons'}]);
   html += '<div class="tabs">';
   cats.forEach(function(c,i){ html += '<button class="tab-btn'+(i===0?' active':'')+'" data-cat="'+c.k+'" onclick="filterCat(this.dataset.cat,this)">'+c.l+'</button>'; });
   html += '</div>';
@@ -2005,7 +2022,7 @@ function pcardHTML(p) {
   var cls = 'pcard' + (clickable ? '' : ' unavail');
   var _imgSrc = p.image && p.image.indexOf('__firebase__') === 0 ? null : p.image;
   var _imgId = 'pimg-' + p.id;
-  var _tint = {bokit:'#242018',agoulou:'#1e2420',crepe_salee:'#20221a',crepe_sucree:'#251d20',boisson:'#1a2024',mini_bokit:'#231f1a',enfant:'#22201a'}[p.cat] || 'var(--dark4)';
+  var _tint = {bokit:'#242018',agoulou:'#1e2420',crepe_salee:'#20221a',crepe_sucree:'#251d20',boisson:'#1a2024',mini_bokit:'#231f1a',enfant:'#22201a',enfant_agoulou:'#1e2420'}[p.cat] || 'var(--dark4)';
   var imgHtml = _imgSrc
     ? '<div class="pcard-img"><img src="'+_imgSrc+'" id="'+_imgId+'" alt="'+p.name+'"/></div>'
     : (p.image && p.image.indexOf('__firebase__') === 0)
@@ -2627,7 +2644,7 @@ function renderCart() {
     +'<button class="btn btn-danger btn-sm" onclick="clearCart()">🗑 Vider</button></div>';
   cart.forEach(function(item){
     var isReward = item.isReward;
-    var _tint = {bokit:'#242018',agoulou:'#1e2420',crepe_salee:'#20221a',crepe_sucree:'#251d20',boisson:'#1a2024',mini_bokit:'#231f1a',enfant:'#22201a'}[item.cat] || 'var(--dark4)';
+    var _tint = {bokit:'#242018',agoulou:'#1e2420',crepe_salee:'#20221a',crepe_sucree:'#251d20',boisson:'#1a2024',mini_bokit:'#231f1a',enfant:'#22201a',enfant_agoulou:'#1e2420'}[item.cat] || 'var(--dark4)';
     var tileBg = isReward ? 'rgba(45,158,95,.12)' : _tint;
     html+='<div class="cart-item"'+(isReward?' style="background:rgba(45,158,95,.05);border-color:rgba(45,158,95,.25)"':'')+'>'
       +'<div class="cart-item-tile" style="background:'+tileBg+'">'+(isReward?'🎁':(EMOJI[item.cat]||'🍽'))+'</div>'
@@ -2997,12 +3014,14 @@ function _doConfirmOrder(confirmBtn, safetyTimer) {
     (function(){
       var prods = getProducts();
       var changed = false;
-      var agoulouQty = 0;
+      var groupQty = {};
+      Object.keys(SHARED_STOCK_CATS).forEach(function(c){ groupQty[c]=0; });
       order.items.forEach(function(item){
         var p = prods.find(function(x){ return x.id===(item.pid||item.id); });
         if (!p) return;
-        if (p.cat === 'agoulou') {
-          agoulouQty += (item.qty||1);
+        if (groupQty[p.cat] !== undefined) {
+          // Stock partage : on cumule, la deduction se fait apres
+          groupQty[p.cat] += (item.qty||1);
         } else if (p.stock !== null && p.stock !== undefined) {
           var qty = item.qty||1;
           p.stock = Math.max(0, p.stock - qty);
@@ -3012,21 +3031,28 @@ function _doConfirmOrder(confirmBtn, safetyTimer) {
           changed = true;
         }
       });
-      if (agoulouQty > 0) {
-        var agoulousAll = prods.filter(function(p){ return p.cat==='agoulou'; });
+      Object.keys(groupQty).forEach(function(cat){
+        var q = groupQty[cat];
+        if (q <= 0) return;
+        var all = prods.filter(function(p){ return p.cat===cat; });
         var stockRef = null;
-        agoulousAll.forEach(function(p){ if (p.stock!==null&&p.stock!==undefined) stockRef=p; });
-        if (stockRef) {
-          var newStock = Math.max(0, stockRef.stock - agoulouQty);
-          agoulousAll.forEach(function(p){
-            p.stock = newStock;
-            if (newStock===0) p.ok = false;
-            saveProduct(p);
-            db.ref('data/ba_products/'+p.id).update({stock:newStock, ok:p.ok});
-          });
-          changed = true;
-        }
-      }
+        all.forEach(function(p){ if (p.stock!==null&&p.stock!==undefined) stockRef=p; });
+        if (!stockRef) return; // stock illimite pour cette categorie
+        var newStock = Math.max(0, stockRef.stock - q);
+        all.forEach(function(p){
+          p.stock = newStock;
+          if (newStock===0) p.ok = false;
+          saveProduct(p);
+          db.ref('data/ba_products/'+p.id).update({stock:newStock, ok:p.ok});
+        });
+        // Ecrire le noeud partage : c'est LUI qui a un listener, donc c'est ce qui
+        // met a jour les autres telephones/tablettes. Sans ca, la deduction restait
+        // invisible sur les autres appareils jusqu'au rechargement.
+        var key = SHARED_STOCK_CATS[cat];
+        save(key, newStock);
+        db.ref('data/'+key).set({stock:newStock, ok:newStock>0});
+        changed = true;
+      });
       if (changed) renderHome();
     })();
     // Vider le panier et fermer la modale
@@ -4178,7 +4204,7 @@ function exportWhatsApp() {
   var dateStr = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   var catCount = {};
   var totalItems = 0;
-  var catLabel = {bokit:'Bokit',agoulou:'Agoulou',crepe_salee:'Crepe Salee',crepe_sucree:'Crepe Sucree',mini_bokit:'Mini Bokit',enfant:'Menu Enfant',boisson:'Boisson'};
+  var catLabel = {bokit:'Bokit',agoulou:'Agoulou',crepe_salee:'Crepe Salee',crepe_sucree:'Crepe Sucree',mini_bokit:'Mini Bokit',enfant:'Menu Enfant',enfant_agoulou:'Menu Enfant Agoulou',boisson:'Boisson'};
   orders.forEach(function(o){
     (o.items||[]).forEach(function(it){
       totalItems++;
@@ -4251,7 +4277,7 @@ function adminPrepa() {
     });
   });
 
-  var CAT_ORDER = ['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','boisson'];
+  var CAT_ORDER = ['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','enfant_agoulou','boisson'];
   var CAT_LABELS = {
     bokit:       '🥩 Bokits',
     agoulou:     '🌯 Agoulous',
@@ -4259,6 +4285,7 @@ function adminPrepa() {
     crepe_sucree:'🍫 Crèpes Sucrées',
     mini_bokit:  '📦 Mini Bokits',
     enfant:      '🧒 Menus Enfants',
+    enfant_agoulou: '🌯🧒 Menus Enfant Agoulou',
     boisson:     '🥤 Boissons'
   };
 
@@ -5191,24 +5218,49 @@ function confirmCancelOrder(id) {
 
 function adminProducts(){
   var prods=getProducts();
-  prods.sort(function(a,b){ return (a.name||'').localeCompare(b.name||'','fr'); });
+  var CAT_ORDER=['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','enfant_agoulou','boisson'];
+  var CAT_LABELS={bokit:'🫓 Bokits',agoulou:'🌯 Agoulous',crepe_salee:'🥞 Crêpes Salées',crepe_sucree:'🍫 Crêpes Sucrées',mini_bokit:'📦 Box Mini Bokits',enfant:'🧒 Menus Enfants',enfant_agoulou:'🌯🧒 Menus Enfant Agoulou',boisson:'🥤 Boissons'};
   var html='<div style="padding:0 .9rem">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin:.75rem 0">'
     +'<span class="font-head fw-800" style="font-size:1.1rem">Produits ('+prods.length+')</span>'
     +'<button class="btn btn-primary btn-sm" onclick="showAddProduct()">+ Ajouter</button></div>';
-  prods.forEach(function(p){
-    html+='<div class="card mb-1" style="display:flex;align-items:center;gap:.75rem">'
-      +(p.image?'<img src="'+p.image+'" style="width:46px;height:46px;object-fit:cover;border-radius:8px">'
-               :'<div style="font-size:1.8rem;width:46px;text-align:center">'+(EMOJI[p.cat]||'🍽')+'</div>')
-      +'<div style="flex:1"><div class="fw-700 text-sm">'+p.name+'</div><div class="text-sm text-gold">'+fmt(p.price||0)+'</div>'
-      +(p.soon?'<div style="font-size:.68rem;color:var(--red)">Prochainement</div>':'')+'</div>'
-      +'<div style="display:flex;flex-direction:column;gap:.3rem;align-items:flex-end">'
-      +'<label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;font-size:.75rem">'
-      +'<input type="checkbox"'+(p.ok&&!p.soon?' checked':'')+' data-pid="'+p.id+'" onchange="toggleProd(this)" style="accent-color:var(--red)"> Dispo</label>'
-      +'<div style="display:flex;gap:.25rem">'
-      +'<button class="btn btn-secondary btn-sm" data-pid="'+p.id+'" onclick="editProduct(this.dataset.pid)" style="font-size:.7rem;padding:.3rem .5rem">✏️</button>'
-      +'<button class="btn btn-danger btn-sm" data-pid="'+p.id+'" onclick="deleteProd(this.dataset.pid)" style="font-size:.7rem;padding:.3rem .5rem">🗑</button>'
-      +'</div></div></div>';
+  // Regrouper par categorie
+  var groups={};
+  prods.forEach(function(p){ var k=p.cat||'autre'; (groups[k]=groups[k]||[]).push(p); });
+  var keys=CAT_ORDER.filter(function(k){ return groups[k]; })
+    .concat(Object.keys(groups).filter(function(k){ return CAT_ORDER.indexOf(k)<0; }).sort());
+  keys.forEach(function(k){
+    var list=groups[k];
+    list.sort(function(a,b){ return (a.name||'').localeCompare(b.name||'','fr'); });
+    var dispo=list.filter(function(p){ return p.ok && !p.soon; }).length;
+    html+='<div style="display:flex;align-items:center;gap:.5rem;margin:1.1rem 0 .5rem">'
+      +'<span class="font-head fw-800" style="font-size:.9rem">'+(CAT_LABELS[k]||k)+'</span>'
+      +'<span style="font-size:.7rem;color:var(--muted);background:rgba(255,255,255,.05);border-radius:100px;padding:.1rem .55rem">'+dispo+'/'+list.length+' actifs</span>'
+      +'<div style="flex:1;height:1px;background:var(--border)"></div></div>';
+    // Stock partage : un seul stock pour toute la categorie
+    if (SHARED_STOCK_CATS[k]) {
+      var sh=null;
+      list.forEach(function(p){ if(p.stock!==null&&p.stock!==undefined) sh=p.stock; });
+      html+='<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25);border-radius:var(--radius-sm);padding:.5rem .75rem;margin-bottom:.5rem;font-size:.75rem;color:var(--gold)">'
+        +'📦 Stock partagé : '+(sh===null?'illimité':sh+' restant'+(sh>1?'s':''))+' — commun aux '+list.length+' variantes'
+        +'</div>';
+    }
+    list.forEach(function(p){
+      html+='<div class="card mb-1" style="display:flex;align-items:center;gap:.75rem">'
+        +(p.image?'<img src="'+p.image+'" style="width:46px;height:46px;object-fit:cover;border-radius:8px">'
+                 :'<div style="font-size:1.8rem;width:46px;text-align:center">'+(EMOJI[p.cat]||'🍽')+'</div>')
+        +'<div style="flex:1;min-width:0"><div class="fw-700 text-sm">'+p.name+'</div><div class="text-sm text-gold">'+fmt(p.price||0)+'</div>'
+        +(p.soon?'<div style="font-size:.68rem;color:var(--red)">Prochainement</div>':'')
+        +(!SHARED_STOCK_CATS[p.cat]&&p.stock!==null&&p.stock!==undefined?'<div style="font-size:.68rem;color:'+(p.stock<=(p.stockAlert||3)?'#f59e0b':'var(--muted)')+'">Stock : '+p.stock+'</div>':'')
+        +'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:.3rem;align-items:flex-end">'
+        +'<label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;font-size:.75rem">'
+        +'<input type="checkbox"'+(p.ok&&!p.soon?' checked':'')+' data-pid="'+p.id+'" onchange="toggleProd(this)" style="accent-color:var(--red)"> Dispo</label>'
+        +'<div style="display:flex;gap:.25rem">'
+        +'<button class="btn btn-secondary btn-sm" data-pid="'+p.id+'" onclick="editProduct(this.dataset.pid)" style="font-size:.7rem;padding:.3rem .5rem">✏️</button>'
+        +'<button class="btn btn-danger btn-sm" data-pid="'+p.id+'" onclick="deleteProd(this.dataset.pid)" style="font-size:.7rem;padding:.3rem .5rem">🗑</button>'
+        +'</div></div></div>';
+    });
   });
   return html+'</div>';
 }
@@ -5232,7 +5284,7 @@ function toggleProd(input){
 }
 function prodForm(p){
   p=p||{};
-  var cats=['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','boisson'];
+  var cats=['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','enfant_agoulou','boisson'];
   var html='<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="pf-n" value="'+(p.name||'')+'"/></div>'
     +'<div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="pf-c">';
   cats.forEach(function(c){html+='<option value="'+c+'"'+(p.cat===c?' selected':'')+'>'+c+'</option>';});
@@ -5389,8 +5441,8 @@ function saveEditProd(id){
       toast('Produit modifié !', 'success');
       var ac = adminContentEl();
       if (ac) ac.innerHTML = adminProducts();
-      if (p.cat === 'agoulou') {
-        setTimeout(function(){ setAgoulouStock(p.stock, p.ok); }, 100);
+      if (SHARED_STOCK_CATS[p.cat]) {
+        setTimeout(function(){ setGroupStock(p.cat, p.stock, p.ok); }, 100);
       }
     } else {
       _newImg = null;

@@ -4478,10 +4478,13 @@ function renderManualOrderModal() {
     if (!bycat[cat]||!bycat[cat].length) return;
     prodsHtml += '<div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin:.75rem 0 .3rem">'+(CAT_LABELS[cat]||cat)+'</div>';
     bycat[cat].forEach(function(p){
-      var needsConfig = ['bokit','crepe_salee','agoulou','enfant','enfant_agoulou'].indexOf(p.cat)>=0;
+      var isBox = p.cat === 'mini_bokit' && !p.contactOnly && !p.noConfig;
+      var needsConfig = isBox || ['bokit','crepe_salee','agoulou','enfant','enfant_agoulou'].indexOf(p.cat)>=0;
       prodsHtml += '<div style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.05)">';
-      prodsHtml += '<div style="flex:1;font-size:.85rem">'+p.name+'<span style="color:var(--gold);font-size:.75rem;margin-left:.4rem">'+p.price.toFixed(2)+'€</span></div>';
-      if (needsConfig) {
+      prodsHtml += '<div style="flex:1;font-size:.85rem">'+p.name+'<span style="color:var(--gold);font-size:.75rem;margin-left:.4rem">'+(p.price?p.price.toFixed(2)+'€':'Sur devis')+'</span></div>';
+      if (p.cat === 'mini_bokit' && p.contactOnly) {
+        prodsHtml += '<span style="font-size:.72rem;color:var(--muted);padding:.3rem .5rem">Sur devis</span>';
+      } else if (needsConfig) {
         prodsHtml += '<button onclick="moConfigProduct(\''+p.id+'\')" style="background:var(--red);border:none;color:#fff;border-radius:6px;padding:.3rem .7rem;cursor:pointer;font-size:.8rem;font-weight:700">+ Config</button>';
       } else {
         prodsHtml += '<button onclick="moAddSimple(\''+p.id+'\',\''+p.name.replace(/'/g,'&apos;')+'\','+p.price+',\''+p.cat+'\')" style="background:var(--red);border:none;color:#fff;border-radius:6px;padding:.3rem .7rem;cursor:pointer;font-size:.8rem;font-weight:700">+</button>';

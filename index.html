@@ -898,7 +898,7 @@ function startFirebaseListeners() {
   });
 
   // Real-time users sync
-  var mergeUsers = function() {
+  var mergeUsers = function(refreshUI) {
     var mergedUsers = {};
     db.ref('data/ba_users').once('value').then(function(s1){
       var old = s1.val() || [];
@@ -909,11 +909,36 @@ function startFirebaseListeners() {
       Object.keys(newU).forEach(function(id){ if(newU[id]) mergedUsers[id]=newU[id]; });
       var arr = Object.values(mergedUsers);
       if (arr.length > 0) try { localStorage.setItem('_ba_ba_users', JSON.stringify(arr)); } catch(e) {}
+      if (refreshUI) refreshUsersUI();
     });
   };
-  // Lecture unique au démarrage (économie bande passante)
-  db.ref('data/users').once('value').then(function(){ mergeUsers(); });
-  db.ref('data/ba_users').once('value').then(function(){ mergeUsers(); });
+  // Rafraichit les ecrans admin qui dependent des utilisateurs (Clients / Dashboard),
+  // sans re-render si une saisie est en cours (sinon on perd la frappe).
+  function refreshUsersUI() {
+    var ae = document.activeElement;
+    if (ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT')) return;
+    var u = getCurrentUser();
+    var uIsAdmin = u && (u.role==='superadmin'||u.role==='admin'||u.role==='entreprise'||u.role==='preparateur');
+    if (!uIsAdmin) return;
+    updateBadges();
+    var ac = adminContentEl();
+    var at = document.querySelector('.admin-tab.active');
+    if (ac && at) {
+      var lbl = at.textContent;
+      if (lbl.indexOf('Clients') >= 0 && typeof adminClients === 'function') ac.innerHTML = adminClients();
+      else if (lbl.indexOf('Dashboard') >= 0 && typeof adminDashboard === 'function') ac.innerHTML = adminDashboard();
+    }
+  }
+  // Listener temps reel : une inscription ou une connexion (lastLogin) se voit
+  // instantanement sur tous les appareils admin. Avant, data/users n'etait lu
+  // qu'une fois au demarrage (.once), donc rien ne remontait en direct.
+  db.ref('data/users').on('value', function(snap){
+    var v = snap.val();
+    if (!v || typeof v !== 'object') return;
+    mergeUsers(true);
+  });
+  // Ancien noeud (comptes historiques) : lecture unique suffisante
+  db.ref('data/ba_users').once('value').then(function(){ mergeUsers(false); });
 
   // Sync produits en temps réel (stock agoulou etc.)
   // Produits : lecture unique (stock mis à jour manuellement)

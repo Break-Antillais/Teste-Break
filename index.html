@@ -1839,31 +1839,57 @@ function doRegister() {
       toast('Code de parrainage valide ! +'+filleulBonus+' points bonus !', 'success', 5000);
     }).catch(function(e){ console.warn('Referral error:', e); });
   }
-  // Rattacher les commandes guest avec le même numéro de téléphone
+  // Rattacher les commandes "guest" (prises par telephone) avec le meme numero,
+  // et crediter retroactivement les points de celles deja recuperees.
   (function(){
     var cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (!cleanPhone) return;
+    var cfgR = getCfg();
+    var ptsPerEuro = cfgR.ptsPerEuro || 5;
+    var bonusThreshold = cfgR.bonusOrderThreshold || 20;
+    var bonusPts = cfgR.bonusOrderPts || 5;
     db.ref('data/ba_orders').once('value').then(function(snap){
       var v = snap.val();
       if (!v) return;
       var orders = Array.isArray(v) ? v : Object.values(v);
+      var gained = 0, count = 0;
       orders.forEach(function(o){
         if (!o || !o.id) return;
-        // Commande guest avec même téléphone
-        if (o.userId && o.userId.indexOf('guest-') === 0) {
-          var orderPhone = (o.userPhone||'').replace(/[^0-9]/g, '');
-          if (orderPhone && orderPhone === cleanPhone) {
-            // Rattacher au nouveau compte
-            db.ref('data/ba_orders/'+o.id+'/userId').set(newUser.id);
-            // Aussi mettre à jour localStorage
-            try {
-              var lsOrders = JSON.parse(localStorage.getItem('_ba_ba_orders')||'[]');
-              var arr = Array.isArray(lsOrders) ? lsOrders : Object.values(lsOrders);
-              var i = arr.findIndex(function(x){ return x && x.id === o.id; });
-              if (i >= 0) { arr[i].userId = newUser.id; localStorage.setItem('_ba_ba_orders', JSON.stringify(arr)); }
-            } catch(e) {}
-          }
+        if (!(o.userId && o.userId.indexOf('guest-') === 0)) return;
+        var orderPhone = (o.userPhone||'').replace(/[^0-9]/g, '');
+        if (!orderPhone || orderPhone !== cleanPhone) return;
+        // 1. Rattacher la commande au nouveau compte
+        db.ref('data/ba_orders/'+o.id+'/userId').set(newUser.id);
+        try {
+          var lsOrders = JSON.parse(localStorage.getItem('_ba_ba_orders')||'[]');
+          var arr = Array.isArray(lsOrders) ? lsOrders : Object.values(lsOrders);
+          var i = arr.findIndex(function(x){ return x && x.id === o.id; });
+          if (i >= 0) { arr[i].userId = newUser.id; localStorage.setItem('_ba_ba_orders', JSON.stringify(arr)); }
+        } catch(e) {}
+        count++;
+        // 2. Crediter les points si la commande a ete recuperee et pas encore creditee
+        if (o.status === 'picked_up' && o.pointsAwarded !== true) {
+          var pts = Math.floor(o.total || 0) * ptsPerEuro;
+          var bonus = (o.total || 0) >= bonusThreshold ? bonusPts : 0;
+          gained += pts + bonus;
+          db.ref('data/ba_orders/'+o.id+'/pointsAwarded').set(true);
         }
       });
+      if (gained > 0) {
+        newUser.points = (newUser.points||0) + gained;
+        db.ref('data/users/'+newUser.id+'/points').set(newUser.points);
+        var hist = load('ba_pts_history_'+newUser.id, []);
+        hist.unshift({pts:gained, label:'Commandes précédentes ('+count+') rattachées', at:new Date().toISOString()});
+        save('ba_pts_history_'+newUser.id, hist);
+        db.ref('data/ba_pts_history_'+newUser.id).set(hist.slice(0,50));
+        saveUser(newUser);
+        setTimeout(function(){
+          toast('🎁 '+gained+' points de vos commandes précédentes ont été ajoutés !', 'success', 6000);
+          if (typeof renderHome === 'function') renderHome();
+        }, 1200);
+      } else if (count > 0) {
+        setTimeout(function(){ toast(count+' commande'+(count>1?'s':'')+' précédente'+(count>1?'s':'')+' rattachée'+(count>1?'s':'')+' à votre compte !', 'success', 5000); }, 1200);
+      }
     }).catch(function(e){ console.warn('Rattachement commandes:', e); });
   })();
   setCurrentUser(newUser);
@@ -4471,17 +4497,18 @@ function renderManualOrderModal() {
     +'<button onclick="_manualOrderMode=false;closeModal(&apos;m-product&apos;)" style="background:rgba(255,255,255,.08);border:none;color:var(--text);font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:100px;font-weight:600;white-space:nowrap">← Retour</button>'
     +'</div>'
     +'<h2 class="modal-title">📝 Commande client</h2>'
+    +'<div style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:var(--radius-sm);padding:.55rem .75rem;margin-bottom:.75rem;font-size:.76rem;color:var(--gold);line-height:1.45">⚡ Commande express : le <b>numéro de téléphone</b> suffit. S\'il crée son compte plus tard avec ce numéro, ses commandes et ses points seront rattachés automatiquement.</div>'
     +'<div class="form-group">'
     +'<label class="form-label">🔍 Rechercher un client existant</label>'
     +'<input class="form-input" id="mo-client-search" placeholder="Nom ou téléphone..." oninput="moSearchClient(this.value)" style="background:var(--dark3)"/>'
     +'<div id="mo-client-results" style="margin-top:.3rem"></div>'
     +'<div id="mo-client-selected" style="display:none;margin-top:.35rem;padding:.4rem .75rem;background:rgba(16,185,129,.1);border:1px solid #10b981;border-radius:8px;font-size:.82rem"></div>'
     +'</div>'
-    +'<div class="form-group"><label class="form-label">Prénom client *</label>'
+    +'<div class="form-group"><label class="form-label">Téléphone *</label>'
+    +'<input class="form-input" id="mo-phone" type="tel" inputmode="numeric" placeholder="Ex: 0612345678" value="'+_manualOrderData.phone+'" oninput="_manualOrderData.phone=this.value"/></div>'
+    +'<div class="form-group"><label class="form-label">Prénom client <span class="text-muted text-sm">— facultatif</span></label>'
     +'<input class="form-input" id="mo-prenom" placeholder="Ex: Michel" value="'+_manualOrderData.prenom+'" oninput="_manualOrderData.prenom=this.value"/></div>'
-    +'<div class="form-group"><label class="form-label">Téléphone</label>'
-    +'<input class="form-input" id="mo-phone" type="tel" placeholder="Ex: 0612345678" value="'+_manualOrderData.phone+'" oninput="_manualOrderData.phone=this.value"/></div>'
-    +'<div class="form-group"><label class="form-label">Email (pour le récap)</label>'
+    +'<div class="form-group"><label class="form-label">Email <span class="text-muted text-sm">— facultatif, pour le récap</span></label>'
     +'<input class="form-input" id="mo-email" type="email" placeholder="client@email.com" value="'+(_manualOrderData.email||'')+'" oninput="_manualOrderData.email=this.value"/></div>'
     +'<div class="form-group"><label class="form-label">Heure de retrait *</label>'
     +'<select class="form-select" id="mo-slot" onchange="_manualOrderData.slot=this.value">'+slotsHtml+'</select></div>'
@@ -4598,7 +4625,13 @@ function submitManualOrder() {
   var prenom = _manualOrderData.prenom.trim();
   var phone  = _manualOrderData.phone.trim();
   var slot   = _manualOrderData.slot.trim();
-  if (!prenom) { toast('Entrez le prénom du client','warning'); return; }
+  var cleanPhone = phone.replace(/[^0-9]/g,'');
+  // Saisie express : le telephone seul suffit. Le prenom devient facultatif ;
+  // s'il manque, on genere un libelle a partir des 4 derniers chiffres. Le
+  // numero est la cle qui permettra de rattacher la commande + les points si le
+  // client cree son compte plus tard.
+  if (!cleanPhone || cleanPhone.length < 6) { toast('Entrez un numéro de téléphone valide','warning'); return; }
+  if (!prenom) prenom = 'Client ' + cleanPhone.slice(-4);
   if (!slot)   { toast('Choisissez un créneau','warning'); return; }
   if (!_manualCart.length) { toast('Ajoutez au moins un produit','warning'); return; }
   _manualSubmitting = true;

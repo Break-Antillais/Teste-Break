@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="theme-color" content="#0a0a0a"/>
+<meta name="theme-color" content="#0C0A08"/>
 <link rel="icon" type="image/png" href="app-icon.png"/>
 <link rel="shortcut icon" type="image/png" href="app-icon.png"/>
 <link rel="apple-touch-icon" href="app-icon.png"/>
@@ -15,28 +15,31 @@
 
 <meta name="mobile-web-app-capable" content="yes"/>
 <title>Break Antillais</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
 :root {
-  --red: #C8232B;
-  --red2: #E8303A;
+  /* Thème Nuit d'Or — l'accent principal (--red) devient l'or */
+  --red: #D4AF37;
+  --red2: #E6C65A;
   --gold: #D4AF37;
-  --dark: #0a0a0a;
-  --dark2: #111111;
-  --dark3: #1a1a1a;
-  --dark4: #222222;
-  --text: #f0ece4;
-  --muted: #777;
-  --border: rgba(255,255,255,0.08);
-  --border-red: rgba(200,35,43,0.25);
-  --radius: 14px;
-  --radius-sm: 9px;
-  --head: 'Syne', sans-serif;
+  --on-accent: #0C0A08;
+  --danger: #D4AF37;
+  --dark: #0C0A08;
+  --dark2: #110E0B;
+  --dark3: #17130F;
+  --dark4: #221C15;
+  --text: #F3EDE2;
+  --muted: #9C9384;
+  --border: rgba(212,175,55,0.13);
+  --border-red: rgba(212,175,55,0.3);
+  --radius: 8px;
+  --radius-sm: 4px;
+  --head: 'Fraunces', Georgia, serif;
   --body: 'DM Sans', sans-serif;
-  --script: 'Dancing Script', cursive;
+  --script: 'Fraunces', Georgia, serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { background: var(--dark) !important; color: var(--text); font-family: var(--body); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
@@ -79,7 +82,7 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
 
 /* QR */
 .qr-wrap { display:flex; flex-direction:column; align-items:center; gap:1.25rem; padding:2rem 1rem 1rem; }
-.qr-box { background:#fff; padding:1.2rem; border-radius:16px; box-shadow:0 8px 32px rgba(200,35,43,.25); }
+.qr-box { background:#fff; padding:1.2rem; border-radius:16px; box-shadow:0 8px 32px rgba(212,175,55,.25); }
 .qr-box canvas { display:block !important; } .qr-box img { display:none !important; }
 
 /* CGV */
@@ -96,7 +99,7 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
 #loading img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; opacity: 1; }
 #loading-inner { position: relative; z-index: 1; text-align: center; margin-bottom: 3rem; }
 #loading-dots { display:flex; gap:.55rem; justify-content:center; opacity:0; animation: fadeIn .5s ease .4s forwards; }
-.loading-dot { width:9px; height:9px; border-radius:50%; background:var(--red); box-shadow:0 0 8px rgba(200,35,43,.7); animation: dotPulse 1.2s ease-in-out infinite; }
+.loading-dot { width:9px; height:9px; border-radius:50%; background:var(--red); box-shadow:0 0 8px rgba(212,175,55,.7); animation: dotPulse 1.2s ease-in-out infinite; }
 .loading-dot:nth-child(2) { animation-delay:.2s; }
 .loading-dot:nth-child(3) { animation-delay:.4s; }
 @keyframes dotPulse { 0%,80%,100% { transform:scale(.6); opacity:.4; } 40% { transform:scale(1); opacity:1; } }
@@ -164,7 +167,7 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
 }
 .btn:active { opacity: .75; transform: scale(.97); }
 .btn:disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
-.btn-primary { background: var(--red); color: #fff; box-shadow: 0 4px 18px rgba(200,35,43,.3); }
+.btn-primary { background: var(--red); color: #fff; box-shadow: 0 4px 18px rgba(212,175,55,.3); }
 .btn-primary:hover { background: var(--red2); transform: translateY(-1px); }
 .btn-secondary { background: rgba(255,255,255,.06); color: var(--text); border: 1px solid var(--border); }
 .btn-secondary:hover { background: rgba(255,255,255,.1); }
@@ -272,9 +275,9 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
   border-radius: 14px; overflow: hidden; cursor: pointer;
   transition: transform .18s, border-color .18s, box-shadow .18s; position: relative;
   touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(200,35,43,.15);
+  -webkit-tap-highlight-color: rgba(212,175,55,.15);
 }
-.pcard:hover { border-color: var(--red); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(200,35,43,.15); }
+.pcard:hover { border-color: var(--red); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,.15); }
 .pcard.unavail { opacity: .5; cursor: not-allowed; }
 .pcard-img { width: 100%; height: 112px; background: var(--dark4); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
 .pcard-img img { width: 100%; height: 100%; object-fit: cover; }
@@ -338,7 +341,7 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
   cursor: pointer; transition: all .15s; margin-bottom: .55rem;
 }
 .pay-opt:hover { border-color: var(--red); }
-.pay-opt.on { border-color: var(--red); background: rgba(200,35,43,.07); }
+.pay-opt.on { border-color: var(--red); background: rgba(212,175,55,.07); }
 
 /* ── STATUS ── */
 .status-badge {
@@ -349,12 +352,12 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
 /* ── PROFILE ── */
 .pts-card {
   background: linear-gradient(135deg, #1c0506, #2e0809);
-  border: 1px solid rgba(200,35,43,.3); border-radius: var(--radius); padding: 1.35rem;
+  border: 1px solid rgba(212,175,55,.3); border-radius: var(--radius); padding: 1.35rem;
   position: relative; overflow: hidden;
 }
 .pts-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 20% 50%, rgba(200,35,43,.12), transparent 60%);
+  background: radial-gradient(ellipse at 20% 50%, rgba(212,175,55,.12), transparent 60%);
 }
 .pts-value { font-family: var(--head); font-size: 2.8rem; font-weight: 800; color: var(--red); line-height: 1; position: relative; }
 .avatar {
@@ -373,7 +376,7 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
   font-family: var(--body); font-weight: 600; font-size: .72rem;
   cursor: pointer; text-align: center; transition: all .15s;
 }
-.admin-tab.active, .admin-tab:hover { border-color: var(--red); color: var(--red); background: rgba(200,35,43,.07); }
+.admin-tab.active, .admin-tab:hover { border-color: var(--red); color: var(--red); background: rgba(212,175,55,.07); }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; padding: 0 .9rem; }
 .stat-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: .45rem; }
 .stat-grid.cols-3 .stat-card { padding: .7rem .35rem; }
@@ -413,6 +416,73 @@ body > *:not(#loading):not(#app-bg):not(nav):not(#m-product):not(#m-auth):not(.t
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
 @media(max-width: 360px) { .pgrid { grid-template-columns: 1fr; } }
+
+/* ═════════ THÈME NUIT D'OR ═════════ */
+html, body { background: var(--dark) !important; }
+.header { background: rgba(12,10,8,.92); border-bottom: 1px solid var(--border); }
+.logo { align-items: baseline; }
+.logo-break { font-family: var(--head); font-weight: 600; font-size: 1.35rem; letter-spacing: -.01em; color: var(--text); }
+.logo-antillais { font-family: var(--head); font-style: italic; font-weight: 400; font-size: 1.35rem; color: var(--gold); margin-left: .3rem; }
+
+/* Titres : serif élégante, moins massive */
+.modal-title, .empty-state .title { font-weight: 600; letter-spacing: -.01em; }
+.sec-title { font-weight: 500; font-style: italic; text-transform: none; letter-spacing: 0; font-size: 1.2rem; }
+.sec-title::after { background: linear-gradient(90deg, rgba(212,175,55,.45), transparent); }
+.pcard-price, .cart-item-price, .stat-val, .pts-value { font-weight: 600; }
+
+/* Texte foncé sur fond or */
+.btn-primary, .chip.on, .slot-btn.on, .nav-badge, .pcard-add, .avatar, .soon-badge, .loading-dot { color: var(--on-accent) !important; }
+.btn-primary { box-shadow: none; letter-spacing: .02em; }
+.btn-primary:hover { background: var(--red2); }
+.btn-secondary { background: transparent; border: 1px solid rgba(212,175,55,.35); color: var(--text); }
+.btn-secondary:hover { background: rgba(212,175,55,.06); }
+.btn-danger, .toast-error { background: #7f1d1d; }
+
+/* Navigation basse */
+.nav { background: rgba(12,10,8,.96); border-top: 1px solid var(--border); }
+.nav-btn { text-transform: none; letter-spacing: .01em; font-weight: 500; font-size: .66rem; }
+.nav-btn svg { stroke-width: 1.6; }
+.nav-btn.active { color: var(--gold); }
+
+/* Onglets de catégories : soulignés comme une carte de restaurant */
+.tabs { gap: 1.4rem; padding: .2rem 1.2rem 0; border-bottom: 1px solid var(--border); }
+.tab-btn { border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: .8rem 0; font-size: .88rem; font-weight: 500; color: var(--muted); background: transparent; }
+.tab-btn.active { background: transparent; color: var(--text); border-bottom-color: var(--gold); font-weight: 700; }
+
+/* Chips */
+.chip { border: 1px solid rgba(212,175,55,.3); }
+.chip:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Cartes produits */
+.pcard { background: var(--dark2); border: 1px solid var(--border); }
+.pcard:hover { border-color: rgba(212,175,55,.5); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.pcard-name { font-family: var(--head); font-weight: 500; font-size: .95rem; }
+.pcard-add { background: transparent !important; border: 1px solid rgba(212,175,55,.5); color: var(--gold) !important; }
+.pcard-add:hover { background: var(--gold) !important; color: var(--on-accent) !important; }
+
+/* Panier, cartes, champs */
+.card, .cart-item, .stat-card { background: var(--dark2); }
+.form-input, .form-select, .form-textarea { background: var(--dark2); border: 1px solid rgba(212,175,55,.18); }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+.form-error { color: #f08a8a; }
+.slot-btn { background: var(--dark2); border: 1px solid rgba(212,175,55,.2); }
+.pay-opt { border: 1px solid rgba(212,175,55,.2); }
+.pay-opt.on { border-color: var(--gold); background: rgba(212,175,55,.07); }
+
+/* Carte fidélité */
+.pts-card { background: linear-gradient(145deg, #1A150D, #0F0C08); border: 1px solid rgba(212,175,55,.35); }
+.pts-card::before { background: radial-gradient(ellipse at 20% 40%, rgba(212,175,55,.14), transparent 60%); }
+
+/* Modales */
+.modal { background: var(--dark2); border: 1px solid rgba(212,175,55,.2); }
+.modal-overlay { background: rgba(5,4,3,.88); }
+
+/* Admin */
+.admin-tab { background: var(--dark2); }
+.admin-tab.active, .admin-tab:hover { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,.07); }
+
+::-webkit-scrollbar-thumb { background: rgba(212,175,55,.5); }
+
 </style>
 </head>
 <body>
@@ -924,13 +994,17 @@ function startFirebaseListeners() {
   // Listener temps reel : une inscription ou une connexion (lastLogin) se voit
   // instantanement sur tous les appareils admin. Avant, data/users n'etait lu
   // qu'une fois au demarrage (.once), donc rien ne remontait en direct.
-  db.ref('data/users').on('value', function(snap){
-    var v = snap.val();
-    if (!v || typeof v !== 'object') return;
-    mergeUsers(true);
-  });
-  // Ancien noeud (comptes historiques) : lecture unique suffisante
-  db.ref('data/ba_users').once('value').then(function(){ mergeUsers(false); });
+  // IMPORTANT (confidentialite/RGPD) : reserve aux comptes cote stand. Un client
+  // ordinaire n'a aucune raison de telecharger l'annuaire complet de la clientele.
+  if (isAdmin) {
+    db.ref('data/users').on('value', function(snap){
+      var v = snap.val();
+      if (!v || typeof v !== 'object') return;
+      mergeUsers(true);
+    });
+    // Ancien noeud (comptes historiques) : lecture unique suffisante
+    db.ref('data/ba_users').once('value').then(function(){ mergeUsers(false); });
+  }
 
   // Sync produits en temps réel (stock agoulou etc.)
   // Produits : lecture unique (stock mis à jour manuellement)
@@ -1124,7 +1198,8 @@ var DEFAULT_PRODUCTS = [
   {id:'mb4',cat:'mini_bokit',name:'Box 40+ Mini Bokit',price:0,desc:'Commande speciale — contactez-nous directement',ok:true,boxType:'box40',maxSaveurs:5,qty:40,contactOnly:true},
   {id:'e1',cat:'enfant',name:'Menu Enfant Bokit',price:5.00,desc:'1 mini bokit + 1 boisson',ok:true},
   {id:'e2',cat:'enfant',name:'Menu Enfant Crepe',price:4.50,desc:'1 crepe sucree + 1 boisson',ok:true},
-  {id:'ea1',cat:'enfant_agoulou',name:'Menu Enfant Agoulou',price:7.00,desc:'1 agoulou enfant + 1 boisson',ok:false,stock:null,stockAlert:3}
+  {id:'ea1',cat:'enfant_agoulou',name:'Menu Enfant Agoulou',price:7.00,desc:'1 agoulou enfant + 1 boisson',ok:false,stock:null,stockAlert:3},
+  {id:'ma1',cat:'agoulou',name:'Menu Mini Agoulou',price:12.00,desc:'2 mini agoulou + 1 boisson au choix — chaque agoulou avec sa viande et sa sauce',ok:true,isMiniAgoulouMenu:true}
 ];
 
 var DEFAULT_CFG = {
@@ -1197,7 +1272,33 @@ function getProducts() {
     return merged;
   }
   // Filter out any deleted that snuck back in
-  return saved.filter(function(p){ return deleted.indexOf(p.id) < 0; });
+  var result = saved.filter(function(p){ return deleted.indexOf(p.id) < 0; });
+  // Forcer les flags spéciaux depuis DEFAULT_PRODUCTS (ne pas dépendre de Firebase pour ça)
+  var SPECIAL_FLAGS = {isMiniAgoulouMenu:true, isClassique:true, contactOnly:true};
+  // Produits dont on force TOUJOURS les champs essentiels depuis DEFAULT (même si Firebase a des valeurs différentes)
+  var FORCE_FROM_DEFAULT = ['ma1'];
+  result.forEach(function(p){
+    var def = DEFAULT_PRODUCTS.find(function(d){ return d.id === p.id; });
+    if (def) {
+      // Pour les produits spéciaux, forcer tous les champs essentiels depuis DEFAULT
+      if (FORCE_FROM_DEFAULT.indexOf(p.id) >= 0) {
+        ['name','price','desc','ok','cat','isMiniAgoulouMenu'].forEach(function(field){
+          if (def[field] !== undefined) p[field] = def[field];
+        });
+      } else {
+        // Pour les autres, uniquement forcer les flags spéciaux
+        Object.keys(SPECIAL_FLAGS).forEach(function(flag){
+          if (def[flag]) p[flag] = def[flag];
+        });
+      }
+    }
+  });
+  // Si ma1 n'existe pas encore dans result, l'ajouter depuis DEFAULT
+  if (!result.find(function(p){ return p.id === 'ma1'; })) {
+    var ma1def = DEFAULT_PRODUCTS.find(function(d){ return d.id === 'ma1'; });
+    if (ma1def) result.push(ma1def);
+  }
+  return result;
 }
 function getCfg() {
   var stored = load('ba_cfg', {});
@@ -1492,7 +1593,16 @@ function go(id) {
 function updateBadges() {
   var cb = document.getElementById('cart-badge');
   var n = cart.reduce(function(s,i){ return s+i.qty; }, 0);
-  if (cb) { cb.textContent=n; cb.style.display=n>0?'flex':'none'; }
+  if (cb) {
+    var prev = parseInt(cb.textContent,10) || 0;
+    cb.textContent=n; cb.style.display=n>0?'flex':'none';
+    // Petit rebond quand le panier augmente : confirme visuellement l'ajout
+    if (n > prev) {
+      cb.classList.remove('badge-bounce');
+      void cb.offsetWidth; // relance l'animation
+      cb.classList.add('badge-bounce');
+    }
+  }
   // Persister le panier
   try { localStorage.setItem('_ba_cart', JSON.stringify(cart)); } catch(e) {}
 }
@@ -1728,7 +1838,7 @@ function showRegister(prefillRef) {
     +'<div class="form-group"><label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer"><input type="checkbox" id="rg-cgv" style="margin-top:.2rem;accent-color:var(--red)"/>'
     +'<span class="text-sm text-muted">J\'accepte les <button type="button" onclick="showCGV()" style="background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;padding:0;font-size:inherit;text-decoration:underline">CGV</button> et la <button type="button" onclick="showRGPD()" style="background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;padding:0;font-size:inherit;text-decoration:underline">politique RGPD</button></span></label>'
     +'<span class="form-error" id="rg-cgv-e"></span></div>'
-    +'<button class="btn btn-primary btn-full" onclick="doRegister()">Creer mon compte</button>'
+    +'<button id="rg-submit" class="btn btn-primary btn-full" onclick="doRegister()">Creer mon compte</button>'
     +'<div class="divider"></div>'
     +'<p class="text-center text-sm text-muted">Deja un compte ? '
     +'<button style="background:none;color:var(--red);border:none;cursor:pointer;font-weight:700" onclick="showLogin()">Se connecter</button></p>'
@@ -1741,7 +1851,24 @@ function doLogin() {
   if (!email||!pwd) { if(err){err.textContent='Champs requis';err.classList.add('show');} return; }
   var users = getUsers();
   var user = users.find(function(u){ return u.email===email && u.pwd===pwd; });
-  if (!user) { if(err){err.textContent='Email ou mot de passe incorrect';err.classList.add('show');} return; }
+  if (user) { _finishLogin(user); return; }
+  // Pas trouve dans le cache local : verifier directement dans Firebase.
+  // (Les clients ne telechargent plus tout l'annuaire, donc un compte cree sur
+  // un autre appareil peut ne pas etre en cache — on va le chercher a la source.)
+  if(err){err.textContent='Vérification...';err.classList.remove('show');}
+  db.ref('data/users').orderByChild('email').equalTo(email).once('value').then(function(snap){
+    var v = snap.val();
+    var found = null;
+    if (v) Object.keys(v).forEach(function(k){ if(v[k] && v[k].pwd===pwd) found=v[k]; });
+    if (!found) { if(err){err.textContent='Email ou mot de passe incorrect';err.classList.add('show');} return; }
+    saveUser(found);
+    _finishLogin(found);
+  }).catch(function(){
+    if(err){err.textContent='Email ou mot de passe incorrect';err.classList.add('show');}
+  });
+}
+function _finishLogin(user) {
+  var err = document.getElementById('li-err');
   var remember = document.getElementById('li-remember') && document.getElementById('li-remember').checked;
   user.lastLogin = new Date().toISOString();
   saveUser(user);
@@ -1786,10 +1913,34 @@ function doRegister() {
   if(pwd!==pwd2) setErr('rg-pw2-e','Mots de passe differents');
   if(!cgv) setErr('rg-cgv-e','Acceptez les CGV');
   if(!ok) return;
-  var users = getUsers();
-  if(users.find(function(u){return u.email===email;})){setErr('rg-e-e','Email deja utilise');return;}
   var phoneDigits = phone.replace(/[^0-9]/g,'');
-  if(users.find(function(u){return u.phone && u.phone.replace(/[^0-9]/g,'')===phoneDigits;})){setErr('rg-t-e','Ce numero a deja un compte');return;}
+  // Verification d'unicite cote Firebase (les clients n'ont plus l'annuaire complet
+  // en local, donc on interroge la source directement — plus sur ET plus fiable).
+  var _rgBtn = document.getElementById('rg-submit');
+  if (_rgBtn) { _rgBtn.disabled = true; _rgBtn.dataset._t = _rgBtn.textContent; _rgBtn.textContent = 'Création...'; }
+  var restore = function(){ if(_rgBtn){ _rgBtn.disabled=false; _rgBtn.textContent=_rgBtn.dataset._t||'Créer mon compte'; } };
+  db.ref('data/users').orderByChild('email').equalTo(email).once('value').then(function(snapE){
+    if (snapE.val()) { restore(); setErr('rg-e-e','Email deja utilise'); return; }
+    return db.ref('data/users').once('value').then(function(snapAll){
+      var all = snapAll.val() || {};
+      var phoneTaken = Object.keys(all).some(function(k){
+        var u = all[k];
+        return u && u.phone && u.phone.replace(/[^0-9]/g,'')===phoneDigits;
+      });
+      if (phoneTaken) { restore(); setErr('rg-t-e','Ce numero a deja un compte'); return; }
+      _createAccount(prenom, phone, email, pwd, bday);
+    });
+  }).catch(function(e){
+    // En cas d'echec reseau, on retombe sur la verification locale (mieux que rien)
+    restore();
+    var users = getUsers();
+    if(users.find(function(u){return u.email===email;})){setErr('rg-e-e','Email deja utilise');return;}
+    if(users.find(function(u){return u.phone && u.phone.replace(/[^0-9]/g,'')===phoneDigits;})){setErr('rg-t-e','Ce numero a deja un compte');return;}
+    _createAccount(prenom, phone, email, pwd, bday);
+  });
+}
+function _createAccount(prenom, phone, email, pwd, bday) {
+  function setErr(id,msg){var el=document.getElementById(id);if(el){el.textContent=msg;el.classList.add('show');}}
   var cfg = getCfg();
   var signupPts = cfg.signupPts||20;
   var newUser = {
@@ -1998,7 +2149,7 @@ function renderHome() {
     if (promos.length > 0) {
       html += '<div style="padding:0 .9rem .75rem"><div class="sec-title">🔥 Mes offres</div>';
       promos.forEach(function(p) {
-        html += '<div style="background:linear-gradient(135deg,#1c0506,#2e0809);border:1px solid rgba(200,35,43,.3);border-radius:var(--radius);padding:.9rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem">'
+        html += '<div style="background:linear-gradient(135deg,#1c0506,#2e0809);border:1px solid rgba(212,175,55,.3);border-radius:var(--radius);padding:.9rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem">'
           +'<span style="font-size:1.8rem">'+(p.type==='birthday'?'🎂':'🎁')+'</span>'
           +'<div><div style="font-weight:700;font-size:.88rem">'+p.title+'</div>'
           +'<div style="font-size:.72rem;color:var(--muted)">'+p.desc+'</div>'
@@ -2008,7 +2159,7 @@ function renderHome() {
       html += '</div>';
     }
   } else {
-    html += '<div style="margin:.25rem .9rem .75rem;padding:.85rem 1rem;background:rgba(200,35,43,.07);border:1px dashed rgba(200,35,43,.3);border-radius:var(--radius);display:flex;align-items:center;justify-content:space-between;gap:.75rem">'
+    html += '<div style="margin:.25rem .9rem .75rem;padding:.85rem 1rem;background:rgba(212,175,55,.07);border:1px dashed rgba(212,175,55,.3);border-radius:var(--radius);display:flex;align-items:center;justify-content:space-between;gap:.75rem">'
       +'<div><div style="font-weight:700;font-size:.85rem;color:var(--red)">🎁 Bienvenue !</div>'
       +'<div style="font-size:.75rem;color:var(--muted)">Inscrivez-vous et recevez '+(getCfg().signupPts||20)+' points offerts</div></div>'
       +'<button class="btn btn-primary btn-sm" onclick="showRegister()">S&apos;inscrire</button>'
@@ -2124,7 +2275,7 @@ function buildBoxConfigurator(p) {
       +'<div style="display:flex;align-items:center;gap:.5rem">'
       +'<button style="width:30px;height:30px;border-radius:50%;background:var(--dark4);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;line-height:1" data-idx="'+i+'" data-max="'+maxSaveurs+'" data-total="'+totalQty+'" data-qps="'+qtyPerSaveur+'" onclick="boxAdjust(this,-1)">−</button>'
       +'<span class="fw-700 text-sm" id="box-qty-'+i+'" style="min-width:50px;text-align:center;font-size:.82rem">0</span>'
-      +'<button style="width:30px;height:30px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1" data-idx="'+i+'" data-max="'+maxSaveurs+'" data-total="'+totalQty+'" data-qps="'+qtyPerSaveur+'" onclick="boxAdjust(this,1)">+</button>'
+      +'<button style="width:30px;height:30px;border-radius:50%;background:var(--red);border:none;color:#0C0A08;font-size:1.2rem;cursor:pointer;line-height:1" data-idx="'+i+'" data-max="'+maxSaveurs+'" data-total="'+totalQty+'" data-qps="'+qtyPerSaveur+'" onclick="boxAdjust(this,1)">+</button>'
       +'</div></div>';
   });
   html += '</div>';
@@ -2240,7 +2391,7 @@ function openProduct(id) {
       +'<div class="modal"><div class="modal-handle"></div>'
       +'<div style="text-align:center;font-size:3rem;margin-bottom:.75rem">📦</div>'
       +'<h2 class="modal-title text-center">'+p.name+'</h2>'
-      +'<div style="background:rgba(200,35,43,.08);border:1.5px solid rgba(200,35,43,.3);border-radius:var(--radius);padding:1rem 1.2rem;margin:.75rem 0">'
+      +'<div style="background:rgba(212,175,55,.08);border:1.5px solid rgba(212,175,55,.3);border-radius:var(--radius);padding:1rem 1.2rem;margin:.75rem 0">'
       +'<div style="font-weight:800;font-size:1rem;margin-bottom:.4rem;color:var(--red)">📞 Commande sur devis</div>'
       +'<div class="text-sm" style="line-height:1.7">Pour une box de 40 mini bokits ou plus, contactez-nous directement. Nous vous preparerons un devis personnalise selon vos saveurs et votre budget.</div>'
       +'</div>'
@@ -2253,7 +2404,138 @@ function openProduct(id) {
     m2.style.display = 'block';
     return;
   }
+  // Menu Mini Agoulou → modal sur mesure
+  if (p.isMiniAgoulouMenu) { openMenuMiniAgoulou(p); return; }
   continueOpenProduct(id);
+}
+
+// ===== MENU MINI AGOULOU — modal sur mesure =====
+var _mmaConfig = { a1:{meat:'',sauce:''}, a2:{meat:'',sauce:''}, drink:'' };
+
+function openMenuMiniAgoulou(p) {
+  _mmaConfig = { a1:{meat:'',sauce:''}, a2:{meat:'',sauce:''}, drink:'' };
+  pendingProd = p;
+  var meats = getMeats('agoulou').filter(function(m){ return m.ok; });
+  var sauces = getSauces();
+  var drinks = getProducts().filter(function(x){ return x.cat==='boisson' && x.ok && (x.stock===null||x.stock===undefined||x.stock>0); });
+
+  function chipsViande(idx) {
+    var html = '<div class="chips" id="mma-meat-'+idx+'">';
+    meats.forEach(function(m){
+      html += '<button class="chip" data-v="'+m.name+'" onclick="mmaPickMeat(\''+idx+'\',this)">'+m.name+'</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+  function chipsSauce(idx) {
+    var html = '<div class="chips" id="mma-sauce-'+idx+'">';
+    sauces.forEach(function(s){
+      html += '<button class="chip" data-v="'+s+'" onclick="mmaPickSauce(\''+idx+'\',this)">'+s+'</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  var html = '<div class="modal-overlay" onclick="if(event.target===this)closeModal(\'m-product\')">'
+    +'<div class="modal">'
+    +'<div class="modal-handle"></div>'
+    +'<h2 class="modal-title">🌯 '+p.name+'</h2>'
+    +'<div class="text-sm text-muted mb-3" style="line-height:1.5">'+p.desc+'</div>'
+
+    // ── Agoulou 1
+    +'<div style="background:var(--dark3);border:1px solid var(--border-red);border-radius:12px;padding:.85rem 1rem;margin-bottom:.75rem">'
+    +'<div style="font-family:var(--head);font-weight:800;font-size:.88rem;color:var(--red);margin-bottom:.6rem">🌯 Mini Agoulou #1</div>'
+    +'<div class="form-group"><label class="form-label">🥩 Viande <span id="mma-meat-lbl-a1" style="color:var(--gold);font-size:.75rem"></span></label>'+chipsViande('a1')+'</div>'
+    +'<div class="form-group"><label class="form-label">🥫 Sauce <span id="mma-sauce-lbl-a1" style="color:var(--gold);font-size:.75rem"></span></label>'+chipsSauce('a1')+'</div>'
+    +'</div>'
+
+    // ── Agoulou 2
+    +'<div style="background:var(--dark3);border:1px solid var(--border-red);border-radius:12px;padding:.85rem 1rem;margin-bottom:.75rem">'
+    +'<div style="font-family:var(--head);font-weight:800;font-size:.88rem;color:var(--red);margin-bottom:.6rem">🌯 Mini Agoulou #2</div>'
+    +'<div class="form-group"><label class="form-label">🥩 Viande <span id="mma-meat-lbl-a2" style="color:var(--gold);font-size:.75rem"></span></label>'+chipsViande('a2')+'</div>'
+    +'<div class="form-group"><label class="form-label">🥫 Sauce <span id="mma-sauce-lbl-a2" style="color:var(--gold);font-size:.75rem"></span></label>'+chipsSauce('a2')+'</div>'
+    +'</div>'
+
+    // ── Boisson
+    +'<div class="form-group"><label class="form-label">🥤 Boisson au choix</label>'
+    +'<div class="chips" id="mma-drink-chips">';
+  drinks.forEach(function(d){
+    html += '<button class="chip" data-vid="'+d.id+'" data-v="'+d.name+'" onclick="mmaPickDrink(this)">'+d.name+'</button>';
+  });
+  if (drinks.length === 0) html += '<div class="text-sm text-muted">Aucune boisson disponible</div>';
+  html += '</div></div>'
+
+    // ── Note
+    +'<div class="form-group"><label class="form-label">📝 Note cuisine (optionnel)</label>'
+    +'<input class="form-input" id="mma-note" placeholder="Ex: sans oignon, extra sauce..."/></div>'
+
+    // ── Prix + bouton
+    +'<div style="display:flex;align-items:center;gap:.75rem;margin-top:.75rem">'
+    +'<div style="font-family:var(--head);font-weight:800;font-size:1.2rem;color:var(--gold);background:var(--dark3);border:1.5px solid rgba(212,175,55,.25);border-radius:var(--radius-sm);padding:.65rem .9rem;white-space:nowrap">'+fmt(p.price||0)+'</div>'
+    +'<button class="btn btn-primary" style="flex:1" onclick="mmaAddToCart()">🛒 Ajouter au panier</button>'
+    +'</div>'
+    +'</div></div>';
+
+  var m = document.getElementById('m-product');
+  m.innerHTML = html;
+  m.style.display = 'block';
+  fitMainNoScrollModal();
+}
+
+function mmaPickMeat(idx, btn) {
+  var wrap = document.getElementById('mma-meat-'+idx);
+  wrap.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on');
+  _mmaConfig[idx].meat = btn.dataset.v;
+  var lbl = document.getElementById('mma-meat-lbl-'+idx);
+  if (lbl) lbl.textContent = '— ' + btn.dataset.v;
+}
+function mmaPickSauce(idx, btn) {
+  var wrap = document.getElementById('mma-sauce-'+idx);
+  wrap.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on');
+  _mmaConfig[idx].sauce = btn.dataset.v;
+  var lbl = document.getElementById('mma-sauce-lbl-'+idx);
+  if (lbl) lbl.textContent = '— ' + btn.dataset.v;
+}
+function mmaPickDrink(btn) {
+  document.querySelectorAll('#mma-drink-chips .chip').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on');
+  _mmaConfig.drink = btn.dataset.vid;
+  _mmaConfig.drinkName = btn.dataset.v;
+}
+function mmaAddToCart() {
+  if (!_mmaConfig.a1.meat) { toast('Choisissez la viande du mini agoulou #1','warning'); return; }
+  if (!_mmaConfig.a1.sauce) { toast('Choisissez la sauce du mini agoulou #1','warning'); return; }
+  if (!_mmaConfig.a2.meat) { toast('Choisissez la viande du mini agoulou #2','warning'); return; }
+  if (!_mmaConfig.a2.sauce) { toast('Choisissez la sauce du mini agoulou #2','warning'); return; }
+  if (!_mmaConfig.drink) { toast('Choisissez votre boisson','warning'); return; }
+  var p = pendingProd;
+  var note = (document.getElementById('mma-note')||{}).value || '';
+  var details = [
+    'Agoulou #1: '+_mmaConfig.a1.meat+' / '+_mmaConfig.a1.sauce,
+    'Agoulou #2: '+_mmaConfig.a2.meat+' / '+_mmaConfig.a2.sauce,
+    'Boisson: '+(_mmaConfig.drinkName||''),
+  ];
+  if (note) details.push('Note: '+note);
+  cart.push({
+    id: p.id, pid: p.id, name: p.name, price: p.price||0, qty: 1,
+    details: details.join(' | '),
+    detailsArr: details,
+    mmaConfig: JSON.parse(JSON.stringify(_mmaConfig))
+  });
+  try { localStorage.setItem('_ba_cart', JSON.stringify(cart)); } catch(e){}
+  closeModal('m-product');
+  updateCartBadge();
+  toast('Ajouté au panier 🛒','success');
+  // Décrémenter stock boisson
+  var drinkProd = getProducts().find(function(x){ return x.id===_mmaConfig.drink; });
+  if (drinkProd && drinkProd.stock !== null && drinkProd.stock !== undefined) {
+    drinkProd.stock = Math.max(0, drinkProd.stock - 1);
+    if (drinkProd.stock === 0) drinkProd.ok = false;
+    saveProduct(drinkProd);
+    db.ref('data/ba_products/'+drinkProd.id).update({stock:drinkProd.stock, ok:drinkProd.ok});
+  }
 }
 
 function continueOpenProduct(id) {
@@ -2340,7 +2622,9 @@ function continueOpenProduct(id) {
       html += '<div class="form-group"><label class="form-label">🥩 '+(mc>1?mc+' viandes':'Viande')+' au choix</label><div class="chips" id="meat-chips">';
       // Pour Menu Enfant Bokit → Morue autorisée, sinon non
       var _meatCat = (p.cat==='enfant' && p.name.toLowerCase().indexOf('bokit')>=0) ? 'enfant_bokit' : p.cat;
+      var _allowedMeats = p.allowedMeats || null; // null = toutes autorisées
       getMeats(_meatCat).forEach(function(m){
+        if (_allowedMeats && _allowedMeats.indexOf(m.name) < 0) return; // filtrée par admin
         var unavail = !m.ok;
         html += '<button class="chip" data-v="'+m.name+'"'
           +(unavail?' disabled style="opacity:.4;cursor:not-allowed;pointer-events:none"':' onclick="toggleMeat(this,'+mc+')"')+'>'
@@ -2370,15 +2654,28 @@ function continueOpenProduct(id) {
     html += '</div></div>';
   }
 
-  html += '<div class="form-group mt-1"><label class="form-label">📝 Note cuisine (optionnel)</label>'
-    +'<input class="form-input" id="prod-note" placeholder="Ex: sans oignon, extra sauce..."/></div>'
+  // Boisson incluse dans le menu
+  if (p.includedDrink) {
+    var drinkProd = getProducts().find(function(x){return x.id===p.includedDrink;});
+    if (drinkProd) {
+      html += '<div style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:.55rem .75rem;margin-top:.5rem;display:flex;align-items:center;gap:.5rem">'
+        +'<span style="font-size:1.1rem">🥤</span>'
+        +'<span style="font-size:.82rem;font-weight:600;color:var(--gold)">Boisson incluse : <span style="color:var(--text)">'+drinkProd.name+'</span></span>'
+        +'</div>';
+    }
+  }
+  // Note cuisine (conditionnée à allowNote du produit, true par défaut)
+  if (p.allowNote !== false) {
+    html += '<div class="form-group mt-1"><label class="form-label">📝 Note cuisine (optionnel)</label>'
+      +'<input class="form-input" id="prod-note" placeholder="Ex: sans oignon, extra sauce..."/></div>';
+  }
 
-    +'<div style="display:flex;align-items:center;gap:.75rem;margin-top:.75rem">'
+  html += '<div style="display:flex;align-items:center;gap:.75rem;margin-top:.75rem">'
     +'<div style="font-family:var(--head);font-weight:800;font-size:1.2rem;color:var(--gold);background:var(--dark3);border:1.5px solid rgba(212,175,55,.25);border-radius:var(--radius-sm);padding:.65rem .9rem;white-space:nowrap" id="cart-btn-price">'+(p.isClassique?'—':fmt(p.price||0))+'</div>'
     +'<div style="display:flex;align-items:center;gap:.5rem">'
     +'<button style="width:32px;height:32px;border-radius:50%;background:var(--dark4);border:1.5px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;flex-shrink:0" onclick="changeQty(-1)">−</button>'
     +'<span style="font-family:var(--head);font-weight:800;font-size:1.1rem;min-width:24px;text-align:center" id="prod-qty">1</span>'
-    +'<button style="width:32px;height:32px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:1.2rem;cursor:pointer;flex-shrink:0" onclick="changeQty(1)">+</button>'
+    +'<button style="width:32px;height:32px;border-radius:50%;background:var(--red);border:none;color:#0C0A08;font-size:1.2rem;cursor:pointer;flex-shrink:0" onclick="changeQty(1)">+</button>'
     +'</div></div>'
     +'<button class="btn btn-primary btn-full mt-1" onclick="addToCart()">🛒 Ajouter au panier</button>'
     +'</div></div>';
@@ -2483,6 +2780,8 @@ function getMeatCount(p) {
   // Menu enfant agoulou et enfant bokit : 1 viande
   if (p.cat === 'enfant_agoulou') return 1;
   if (p.cat === 'enfant') return 1;
+  // Champ explicite défini par l'admin (prioritaire)
+  if (p.meatCount !== undefined && p.meatCount !== null) return parseInt(p.meatCount)||0;
   var n=p.name.toLowerCase();
   if(n.includes('4 viande'))return 4;
   if(n.includes('3 viande'))return 3;
@@ -2703,7 +3002,7 @@ function renderCart() {
       +'</div>'
       +'<span class="cart-item-price"'+(isReward?' style="color:#2d9e5f;font-family:var(--body);font-weight:600;font-size:.8rem"':'')+'>'+(isReward?'Offert':fmt(item.price||0))+'</span>'
       +(!isReward?'<button class="cart-btn" style="background:rgba(212,175,55,.15);color:var(--gold)" data-cid="'+item.id+'" onclick="editCartItem(this.dataset.cid)">✏️</button>':'')
-      +'<button class="cart-btn" style="background:rgba(200,35,43,.15);color:var(--red)" data-cid="'+item.id+'" onclick="removeFromCart(this.dataset.cid)">✕</button>'
+      +'<button class="cart-btn" style="background:rgba(212,175,55,.15);color:var(--red)" data-cid="'+item.id+'" onclick="removeFromCart(this.dataset.cid)">✕</button>'
       +'</div>';
   });
   html+='<div class="card mt-2">'
@@ -2907,7 +3206,7 @@ function pickSlot(btn){
     if (slotData && slotData.count + itemCount > (cfg.maxSlot||8)) {
       // Suggest next slot
       var next = findNextAvailableSlot(date, itemCount, cfg);
-      info.innerHTML = '<span style="color:#f59e0b">⚠️ Ce creneau sera plein avec votre commande ('+(slotData.count+itemCount)+' articles).'+(next?' <button class="btn btn-sm" style="background:rgba(200,35,43,.2);color:var(--red);border:none;cursor:pointer;font-size:.78rem" onclick="autoSelectSlot(&quot;'+next+'&quot;)">→ Prendre '+next+' a la place</button>':'')+'</span>';
+      info.innerHTML = '<span style="color:#f59e0b">⚠️ Ce creneau sera plein avec votre commande ('+(slotData.count+itemCount)+' articles).'+(next?' <button class="btn btn-sm" style="background:rgba(212,175,55,.2);color:var(--red);border:none;cursor:pointer;font-size:.78rem" onclick="autoSelectSlot(&quot;'+next+'&quot;)">→ Prendre '+next+' a la place</button>':'')+'</span>';
     } else {
       info.textContent = '';
     }
@@ -2957,6 +3256,29 @@ function computeOrderNumber() {
   return String(maxN + 1).padStart(4, '0');
 }
 
+// Verifie qu'une date de retrait est bien ouverte a la commande.
+// Renvoie null si OK, sinon un message d'erreur. Utilise pour empecher une
+// commande sur un jour ferme / non travaille / apres l'heure limite, meme si le
+// client avait deja un creneau selectionne avant la mise en place de la fermeture.
+function checkDateClosedReason(dateStr, cfg) {
+  cfg = cfg || getCfg();
+  var closedDates = cfg.closedDates || [];
+  var hit = closedDates.find(function(c){ return c && c.date === dateStr; });
+  if (hit) return 'Nous sommes exceptionnellement fermés ce jour-là' + (hit.msg ? ' ('+hit.msg+')' : '') + '. Merci de choisir une autre date.';
+  var d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  var openDays = cfg.openDays || [2,3,4,5,6];
+  if (openDays.indexOf(d.getDay()) < 0) return 'Nous sommes fermés ce jour-là. Merci de choisir un autre jour.';
+  // Si le retrait est aujourd'hui, verifier l'heure limite de commande
+  var todayStr = new Date().toISOString().split('T')[0];
+  if (dateStr === todayStr && cfg.cutoff) {
+    var cp = cfg.cutoff.split(':');
+    var cutoff = new Date(); cutoff.setHours(+cp[0], +cp[1], 0, 0);
+    if (new Date() >= cutoff) return 'Les commandes du jour sont clôturées (limite ' + cfg.cutoff + '). Choisissez une autre date.';
+  }
+  return null;
+}
+
 function confirmOrder(){
   var confirmBtn = document.getElementById('confirm-btn');
   if (confirmBtn && confirmBtn._loading) return;
@@ -2967,6 +3289,48 @@ function confirmOrder(){
 
   // Vérif stock Firebase AVANT de bloquer le bouton
   db.ref('data/ba_products').once('value').then(function(snapProds){
+    // Recharger config fraiche + commandes depuis Firebase.
+    var _pickupDate = window._selectedDate || new Date().toISOString().split('T')[0];
+    return db.ref('data/ba_cfg').once('value').then(function(snapCfg){
+      // Barriere fermeture : re-verifier avec la config a jour (pas le cache).
+      // Empeche une commande sur un jour ferme meme si le client avait deja un
+      // creneau selectionne avant la mise en place de la fermeture.
+      try {
+        var vc = snapCfg.val();
+        if (vc && typeof vc === 'object' && Object.keys(vc).length) {
+          try { localStorage.setItem('_ba_ba_cfg', JSON.stringify(vc)); } catch(e) {}
+        }
+        var freshCfg = getCfg();
+        var closedReason = checkDateClosedReason(_pickupDate, freshCfg);
+        if (closedReason) {
+          updateBadges();
+          showStockAlert(closedReason);
+          throw {_baHandled:true};
+        }
+      } catch(e) { if (e && e._baHandled) throw e; }
+      return db.ref('data/ba_orders').once('value');
+    }).then(function(snapOrders){
+      try {
+        var vo = snapOrders.val();
+        if (vo && typeof vo === 'object') {
+          var freshOrders = Array.isArray(vo) ? vo : Object.values(vo).filter(function(x){ return x && x.id; });
+          if (freshOrders.length) {
+            var existingStr = localStorage.getItem('_ba_ba_orders');
+            var existing = existingStr ? JSON.parse(existingStr) : [];
+            if (!Array.isArray(existing)) existing = Object.values(existing||{}).filter(function(x){return x&&x.id;});
+            var merged = existing.slice();
+            freshOrders.forEach(function(o){
+              var i = merged.findIndex(function(x){ return x && x.id === o.id; });
+              if (i >= 0) merged[i] = o; else merged.push(o);
+            });
+            localStorage.setItem('_ba_ba_orders', JSON.stringify(merged));
+          }
+        }
+      } catch(e) { console.warn('[BA] reload commandes:', e); }
+      return snapProds;
+    });
+  }).then(function(snapProds){
+    if (!snapProds) return; // barriere fermeture a interrompu le flux
     var freshProds = snapProds.val();
     if (freshProds) {
       var freshArr = Array.isArray(freshProds) ? freshProds : Object.values(freshProds).filter(function(x){return x&&x.id;});
@@ -3008,7 +3372,11 @@ function confirmOrder(){
     }, 8000);
     _doConfirmOrder(confirmBtn, safetyTimer);
   }).catch(function(e){
+    if (e && e._baHandled) { btnReset(confirmBtn); if(confirmBtn) confirmBtn._loading=false; return; }
     console.log('[BA] Etape 0 : Firebase inaccessible, on continue', e);
+    // Filet de securite hors-ligne : verifier la fermeture avec le cache local
+    var closedReason = checkDateClosedReason(window._selectedDate || new Date().toISOString().split('T')[0]);
+    if (closedReason) { updateBadges(); showStockAlert(closedReason); return; }
     btnLoading(confirmBtn, '⏳ Validation...');
     confirmBtn && (confirmBtn._loading = true);
     var safetyTimer = setTimeout(function(){
@@ -3086,6 +3454,17 @@ function _doConfirmOrder(confirmBtn, safetyTimer) {
         if (groupQty[p.cat] !== undefined) {
           // Stock partage : on cumule, la deduction se fait apres
           groupQty[p.cat] += (item.qty||1);
+        } else if (p.stockLinkedTo) {
+          // Stock rattaché à un autre produit : décrémenter le produit source
+          var srcProd = prods.find(function(x){ return x.id===p.stockLinkedTo; });
+          if (srcProd && srcProd.stock !== null && srcProd.stock !== undefined) {
+            var qty = item.qty||1;
+            srcProd.stock = Math.max(0, srcProd.stock - qty);
+            if (srcProd.stock === 0) srcProd.ok = false;
+            saveProduct(srcProd);
+            db.ref('data/ba_products/'+srcProd.id).update({stock:srcProd.stock, ok:srcProd.ok});
+            changed = true;
+          }
         } else if (p.stock !== null && p.stock !== undefined) {
           var qty = item.qty||1;
           p.stock = Math.max(0, p.stock - qty);
@@ -3503,7 +3882,7 @@ function renderInfo() {
 
   // Section commandes evenements
   html += '<div class="sec-title">🎉 Commandes événements</div>'
-    +'<div class="card mb-2" style="background:#1a1210;border-color:rgba(200,35,43,.25)">'
+    +'<div class="card mb-2" style="background:#1a1210;border-color:rgba(212,175,55,.25)">'
     +'<div class="fw-700 mb-1" style="font-size:.95rem">Anniversaires, réunions, événements...</div>'
     +'<p class="text-sm text-muted mb-2" style="line-height:1.5">Vous organisez un événement et souhaitez commander en grande quantité ? Contactez-nous pour établir un devis personnalisé.</p>'
     +'<div style="display:flex;gap:.5rem;flex-wrap:wrap">'
@@ -3736,7 +4115,7 @@ function renderProfile(){
     var choices = p.choices||[];
     var ptsManquants = Math.max(0, pSeuil - pts);
     var borderColor = active ? 'var(--red)' : unlocked && hasReward ? 'rgba(45,158,95,.4)' : 'var(--border)';
-    var bgColor     = active ? 'rgba(200,35,43,.07)' : unlocked ? 'rgba(45,158,95,.04)' : 'var(--dark3)';
+    var bgColor     = active ? 'rgba(212,175,55,.07)' : unlocked ? 'rgba(45,158,95,.04)' : 'var(--dark3)';
     html += '<div style="border:1px solid '+borderColor+';background:'+bgColor+';border-radius:var(--radius-sm);margin-bottom:.5rem;overflow:hidden">';
     html += '<div style="display:flex;align-items:center;gap:.65rem;padding:.75rem .9rem">';
     html += '<span style="font-size:1.4rem'+(unlocked?'':';filter:grayscale(1);opacity:.5')+'">' + p.icon + '</span>';
@@ -3865,7 +4244,7 @@ function _adminZoneBarInner(){
   var h='';
   zones.forEach(function(z){
     var on=z.key===nav.zone;
-    h+='<button class="admin-zone" onclick="adminZone(&apos;'+z.key+'&apos;)" style="padding:.55rem .3rem;border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-family:var(--body);font-weight:700;font-size:.72rem;transition:all .15s;border:1px solid '+(on?'var(--red)':'var(--border)')+';background:'+(on?'var(--red)':'var(--dark3)')+';color:'+(on?'#fff':'var(--muted)')+'"><div style="font-size:1.05rem;line-height:1.1;margin-bottom:.1rem">'+z.icon+'</div>'+z.label+'</button>';
+    h+='<button class="admin-zone" onclick="adminZone(&apos;'+z.key+'&apos;)" style="padding:.55rem .3rem;border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-family:var(--body);font-weight:700;font-size:.72rem;transition:all .15s;border:1px solid '+(on?'var(--red)':'var(--border)')+';background:'+(on?'var(--red)':'var(--dark3)')+';color:'+(on?'var(--on-accent)':'var(--muted)')+'"><div style="font-size:1.05rem;line-height:1.1;margin-bottom:.1rem">'+z.icon+'</div>'+z.label+'</button>';
   });
   return h;
 }
@@ -4475,7 +4854,7 @@ function renderManualOrderModal() {
       cartHtml += '</div>';
       cartHtml += '<div style="display:flex;align-items:center;gap:.4rem">';
       cartHtml += '<span style="color:var(--gold);font-size:.82rem">'+(it.price*it.qty).toFixed(2)+'€</span>';
-      cartHtml += '<button onclick="moRemoveItem(\''+it.name.replace(/'/g,'&apos;')+'\')" style="background:rgba(200,35,43,.2);border:none;color:#ef4444;border-radius:4px;padding:.1rem .35rem;cursor:pointer;font-size:.75rem">✕</button>';
+      cartHtml += '<button onclick="moRemoveItem(\''+it.name.replace(/'/g,'&apos;')+'\')" style="background:rgba(212,175,55,.2);border:none;color:#ef4444;border-radius:4px;padding:.1rem .35rem;cursor:pointer;font-size:.75rem">✕</button>';
       cartHtml += '</div></div>';
     });
     var total = _manualCart.reduce(function(s,i){return s+i.price;},0);
@@ -4496,9 +4875,9 @@ function renderManualOrderModal() {
       if (p.cat === 'mini_bokit' && p.contactOnly) {
         prodsHtml += '<span style="font-size:.72rem;color:var(--muted);padding:.3rem .5rem">Sur devis</span>';
       } else if (needsConfig) {
-        prodsHtml += '<button onclick="moConfigProduct(\''+p.id+'\')" style="background:var(--red);border:none;color:#fff;border-radius:6px;padding:.3rem .7rem;cursor:pointer;font-size:.8rem;font-weight:700">+ Config</button>';
+        prodsHtml += '<button onclick="moConfigProduct(\''+p.id+'\')" style="background:var(--red);border:none;color:#0C0A08;border-radius:6px;padding:.3rem .7rem;cursor:pointer;font-size:.8rem;font-weight:700">+ Config</button>';
       } else {
-        prodsHtml += '<button onclick="moAddSimple(\''+p.id+'\',\''+p.name.replace(/'/g,'&apos;')+'\','+p.price+',\''+p.cat+'\')" style="background:var(--red);border:none;color:#fff;border-radius:6px;padding:.3rem .7rem;cursor:pointer;font-size:.8rem;font-weight:700">+</button>';
+        prodsHtml += '<button onclick="moAddSimple(\''+p.id+'\',\''+p.name.replace(/'/g,'&apos;')+'\','+p.price+',\''+p.cat+'\')" style="background:var(--red);border:none;color:#0C0A08;border-radius:6px;padding:.3rem .7rem;cursor:pointer;font-size:.8rem;font-weight:700">+</button>';
       }
       prodsHtml += '</div>';
     });
@@ -4885,7 +5264,7 @@ function showPhotoFullscreen(src, name) {
 
 function launchConfetti(duration) {
   duration = duration || 2500;
-  var colors = ['#C8232B','#D4AF37','#fff','#10b981','#3b82f6','#f59e0b'];
+  var colors = ['#D4AF37','#D4AF37','#fff','#10b981','#3b82f6','#f59e0b'];
   var container = document.createElement('div');
   container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden';
   document.body.appendChild(container);
@@ -4935,7 +5314,7 @@ function _renderPrepModal(o) {
       + 'border-radius:12px;padding:.85rem 1rem;margin-bottom:.55rem;transition:all .25s">'
       + '<div style="display:flex;align-items:center;gap:.65rem">'
       // Numéro / check
-      + '<div style="background:'+(isDone?'#10b981':'var(--red)')+';color:#fff;font-family:var(--head);font-weight:900;'
+      + '<div style="background:'+(isDone?'#10b981':'var(--red)')+';color:'+(isDone?'#fff':'var(--on-accent)')+';font-family:var(--head);font-weight:900;'
       + 'font-size:1rem;min-width:30px;height:30px;border-radius:50%;'
       + 'display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .25s">'
       + (isDone ? '✓' : (i+1))+'</div>'
@@ -5401,6 +5780,16 @@ function onProdCatChange() {
   var a = (curAlert && curAlert.value !== '') ? parseInt(curAlert.value,10) : 3;
   wrap.innerHTML = prodStockField(sel.value, v, a);
 }
+function onProdDrinkToggle() {
+  var cb = document.getElementById('pf-drink-toggle');
+  var wrap = document.getElementById('pf-drink-wrap');
+  if (wrap) wrap.style.display = (cb && cb.checked) ? 'block' : 'none';
+}
+function onProdStockLinkToggle() {
+  var cb = document.getElementById('pf-stocklink-toggle');
+  var wrap = document.getElementById('pf-stocklink-wrap');
+  if (wrap) wrap.style.display = (cb && cb.checked) ? 'block' : 'none';
+}
 function prodForm(p){
   p=p||{};
   var cats=['bokit','agoulou','crepe_salee','crepe_sucree','mini_bokit','enfant','enfant_agoulou','boisson'];
@@ -5433,6 +5822,89 @@ function prodForm(p){
       +'</div><div class="divider"></div>';
   }
 
+  // ===== VIANDES AUTORISEES (pour catégories avec viandes) =====
+  var meatCats = ['bokit','agoulou','crepe_salee','enfant','enfant_agoulou'];
+  if (meatCats.indexOf(p.cat||'bokit') >= 0 && !p.isClassique) {
+    var allMeats = getMeats ? getMeats('all') : (load('ba_meats', DEFAULT_MEATS)||[]);
+    var pMeats = p.allowedMeats; // undefined = toutes autorisées, array = liste restreinte
+    var pMeatCount = (p.meatCount !== undefined && p.meatCount !== null) ? p.meatCount : '';
+    html += '<div class="form-group"><label class="form-label">🥩 Nombre de viandes au choix</label>';
+    html += '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">';
+    html += '<input class="form-input" id="pf-meatcount" type="number" min="0" max="4" value="'+pMeatCount+'" placeholder="0 = pas de viande" style="max-width:160px"/>';
+    html += '<span style="font-size:.75rem;color:var(--muted)">Le client devra en choisir ce nombre</span>';
+    html += '</div>';
+    html += '<label class="form-label" style="margin-bottom:.3rem">🥩 Viandes proposées aux clients</label>';
+    html += '<div style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem">Décochez pour masquer une viande sur ce produit</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:.35rem" id="pf-meats-wrap">';
+    allMeats.forEach(function(m){
+      var isAllowed = !pMeats || pMeats.indexOf(m.name) >= 0;
+      html += '<label style="display:flex;align-items:center;gap:.25rem;cursor:pointer;font-size:.75rem;background:var(--dark4);padding:.25rem .6rem;border-radius:100px;border:1px solid '+(isAllowed?'var(--red)':'var(--border)')+';">'
+        +'<input type="checkbox" name="pf-meat" value="'+m.name+'"'+(isAllowed?' checked':'')+' style="accent-color:var(--red)"> '+m.name+'</label>';
+    });
+    html += '</div></div>';
+  }
+
+  // ===== BOISSON INCLUSE =====
+  var drinkCats = ['bokit','agoulou','crepe_salee','enfant','enfant_agoulou','mini_bokit'];
+  if (drinkCats.indexOf(p.cat||'bokit') >= 0) {
+    // Filtrer : boissons dispo (ok) ET stock > 0 (ou stock non géré = null)
+    var allDrinks = (getProducts ? getProducts() : []).filter(function(x){
+      return x.cat==='boisson' && x.ok && (x.stock === null || x.stock === undefined || x.stock > 0);
+    });
+    var hasDrink = p.includedDrink ? true : false;
+    html += '<div class="form-group"><label style="display:flex;align-items:center;gap:.4rem;cursor:pointer">'
+      +'<input type="checkbox" id="pf-drink-toggle" style="accent-color:var(--red)" onchange="onProdDrinkToggle()"'+(hasDrink?' checked':'')+'>'
+      +' 🥤 Boisson incluse dans ce menu</label></div>'
+      +'<div id="pf-drink-wrap" style="display:'+(hasDrink?'block':'none')+';margin-top:-.25rem;margin-bottom:.5rem">'
+      +'<select class="form-select" id="pf-drink-id">';
+    if (allDrinks.length === 0) {
+      html += '<option value="">-- Aucune boisson en stock --</option>';
+    } else {
+      html += '<option value="">-- Choisir une boisson --</option>';
+      allDrinks.forEach(function(d){
+        var stockInfo = (d.stock !== null && d.stock !== undefined) ? ' ('+d.stock+' en stock)' : '';
+        var sel = p.includedDrink && p.includedDrink===d.id ? ' selected' : '';
+        html += '<option value="'+d.id+'"'+sel+'>'+d.name+stockInfo+'</option>';
+      });
+    }
+    html += '</select>'
+      +'<div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">Seules les boissons disponibles en stock sont affichées</div>'
+      +'</div>';
+  }
+
+  // ===== STOCK LIÉ =====
+  var stockLinkCats = ['bokit','agoulou','crepe_salee','enfant','enfant_agoulou','mini_bokit','crepe_sucree'];
+  if (stockLinkCats.indexOf(p.cat||'bokit') >= 0) {
+    // Produits avec stock géré (boissons et autres) — pas de stock partagé par catégorie
+    var stockProds = (getProducts ? getProducts() : []).filter(function(x){
+      return x.stock !== null && x.stock !== undefined && !SHARED_STOCK_CATS[x.cat] && x.id !== p.id;
+    });
+    var hasLink = p.stockLinkedTo ? true : false;
+    html += '<div class="form-group"><label style="display:flex;align-items:center;gap:.4rem;cursor:pointer">'
+      +'<input type="checkbox" id="pf-stocklink-toggle" style="accent-color:var(--gold)" onchange="onProdStockLinkToggle()"'+(hasLink?' checked':'')+'>'
+      +' 📦 Rattacher le stock à un autre produit</label>'
+      +'<div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">Le stock de ce produit suivra celui du produit sélectionné</div></div>'
+      +'<div id="pf-stocklink-wrap" style="display:'+(hasLink?'block':'none')+';margin-top:-.25rem;margin-bottom:.5rem">'
+      +'<select class="form-select" id="pf-stocklink-id">';
+    if (stockProds.length === 0) {
+      html += '<option value="">-- Aucun produit avec stock défini --</option>';
+    } else {
+      html += '<option value="">-- Choisir un produit --</option>';
+      stockProds.forEach(function(x){
+        var sel = p.stockLinkedTo && p.stockLinkedTo===x.id ? ' selected' : '';
+        html += '<option value="'+x.id+'"'+sel+'>'+x.name+' (stock: '+(x.stock||0)+')</option>';
+      });
+    }
+    html += '</select></div>';
+  }
+
+  // ===== NOTE CLIENT =====
+  var allowNote = p.allowNote !== false; // true par défaut
+  html += '<div class="form-group"><label style="display:flex;align-items:center;gap:.4rem;cursor:pointer">'
+    +'<input type="checkbox" id="pf-allownote" style="accent-color:var(--red)"'+(allowNote?' checked':'')+'>'
+    +' 📝 Permettre au client d\'ajouter une note</label></div>';
+
+  // ===== ALLERGENES =====
   var ALLERGENS = ['Gluten','Oeufs','Lait','Soja','Fruits a coque','Arachides','Poisson'];
   var pAllergens = p.allergens || [];
   html += '<div class="form-group"><label class="form-label">Allergenes</label><div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem">';
@@ -5529,6 +6001,50 @@ function getProdFormData(){
   };
   var noConfigEl = document.getElementById('pf-noconfig');
   if (noConfigEl) data.noConfig = noConfigEl.checked;
+
+  // Nombre de viandes au choix
+  var meatCountEl = document.getElementById('pf-meatcount');
+  if (meatCountEl) {
+    data.meatCount = meatCountEl.value !== '' ? parseInt(meatCountEl.value) : null;
+  }
+
+  // Viandes autorisées
+  var meatChecks = document.querySelectorAll('input[name="pf-meat"]');
+  if (meatChecks.length > 0) {
+    var allChecked = Array.from(meatChecks).every(function(el){return el.checked;});
+    if (allChecked) {
+      data.allowedMeats = null; // toutes autorisées = null (pas de restriction)
+    } else {
+      data.allowedMeats = Array.from(meatChecks).filter(function(el){return el.checked;}).map(function(el){return el.value;});
+    }
+  }
+
+  // Boisson incluse
+  var drinkToggle = document.getElementById('pf-drink-toggle');
+  if (drinkToggle) {
+    if (drinkToggle.checked) {
+      var drinkSel = document.getElementById('pf-drink-id');
+      data.includedDrink = drinkSel ? (drinkSel.value || null) : null;
+    } else {
+      data.includedDrink = null;
+    }
+  }
+
+  // Stock rattaché à un autre produit
+  var stockLinkToggle = document.getElementById('pf-stocklink-toggle');
+  if (stockLinkToggle) {
+    if (stockLinkToggle.checked) {
+      var stockLinkSel = document.getElementById('pf-stocklink-id');
+      data.stockLinkedTo = stockLinkSel ? (stockLinkSel.value || null) : null;
+    } else {
+      data.stockLinkedTo = null;
+    }
+  }
+
+  // Note client autorisée
+  var allowNoteEl = document.getElementById('pf-allownote');
+  data.allowNote = allowNoteEl ? allowNoteEl.checked : true;
+
   // Supprimer toutes les valeurs undefined ou null inutiles
   Object.keys(data).forEach(function(k){ if (data[k] === undefined) delete data[k]; });
   return data;
@@ -6024,7 +6540,7 @@ function loadMarketCodesHistory() {
         +'<div class="text-muted" style="font-size:.7rem">'+c.amount.toFixed(2)+'&euro; &rarr; +'+c.pts+' pts &bull; '+dateStr+'</div></div>'
         +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">'
         +'<span style="color:'+(c.used?'var(--muted)':'#10b981')+';font-weight:700;font-size:.75rem'>+(c.used?'Utilise':'Actif')+'</span>'
-        +(c.used?'': '<button data-code="'+c.code+'" onclick="deleteMarketCode(this.dataset.code)" style="background:rgba(200,35,43,.15);border:1px solid rgba(200,35,43,.4);color:#ef4444;font-size:.7rem;padding:.2rem .55rem;border-radius:4px;cursor:pointer">Supprimer</button>')
+        +(c.used?'': '<button data-code="'+c.code+'" onclick="deleteMarketCode(this.dataset.code)" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#ef4444;font-size:.7rem;padding:.2rem .55rem;border-radius:4px;cursor:pointer">Supprimer</button>')
         +'</div>'
         +'</div></div>';
     });
@@ -6891,7 +7407,7 @@ function buildChoicesCheckboxes(palierIdx, selected) {
       +'<input type="checkbox" data-palier="'+palierIdx+'" data-prod="'+p.name+'" '+(checked?'checked':'')+' style="accent-color:var(--red)"/>'
       +p.name+'</label>';
   });
-  html += '<button type="button" class="btn btn-sm" style="font-size:.7rem;padding:.2rem .45rem;background:rgba(200,35,43,.12);border-color:var(--red);color:var(--red)" onclick="addCustomChoiceToPalier('+palierIdx+')">+ Ajouter</button>';
+  html += '<button type="button" class="btn btn-sm" style="font-size:.7rem;padding:.2rem .45rem;background:rgba(212,175,55,.12);border-color:var(--red);color:var(--red)" onclick="addCustomChoiceToPalier('+palierIdx+')">+ Ajouter</button>';
   return html;
 }
 
@@ -7124,7 +7640,7 @@ function buildSlotToggles() {
   slots.forEach(function(s) {
     var isOff = disabled.indexOf(s.time) >= 0;
     var col = isOff ? '#ef4444' : '#10b981';
-    var bg  = isOff ? 'rgba(200,35,43,.2)' : 'rgba(16,185,129,.1)';
+    var bg  = isOff ? 'rgba(212,175,55,.2)' : 'rgba(16,185,129,.1)';
     var lbl = (isOff ? '🔴 ' : '🟢 ') + s.time;
     h += '<button data-slot="' + s.time + '" onclick="toggleSlot(this.dataset.slot,this)"'
       + ' style="padding:.35rem .7rem;border-radius:6px;font-size:.82rem;font-weight:700;cursor:pointer;'
@@ -7148,7 +7664,7 @@ function toggleSlot(time, btn) {
   // Mettre à jour le bouton visuellement
   var isOff = disabled.indexOf(time) >= 0;
   btn.style.borderColor = isOff ? '#ef4444' : '#10b981';
-  btn.style.background = isOff ? 'rgba(200,35,43,.2)' : 'rgba(16,185,129,.1)';
+  btn.style.background = isOff ? 'rgba(212,175,55,.2)' : 'rgba(16,185,129,.1)';
   btn.style.color = isOff ? '#ef4444' : '#10b981';
   btn.textContent = (isOff ? '🔴 ' : '🟢 ') + time;
   toast(time + (isOff ? ' bloqué' : ' réouvert'), isOff ? 'warning' : 'success', 2000);
@@ -8054,7 +8570,7 @@ function showBirthdayModal(prenom, pts, total) {
     +'<div style="font-size:3.5rem;margin-bottom:.25rem">🎂</div>'
     +'<h2 class="modal-title" style="font-size:1.3rem">Joyeux anniversaire<br>'+prenom+' !</h2>'
     +'<p style="font-size:.85rem;color:var(--muted);margin:.5rem 0 1rem">Break Antillais vous souhaite un excellent anniversaire 🎉</p>'
-    +'<div style="background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(200,35,43,.1));border:1.5px solid rgba(212,175,55,.4);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">'
+    +'<div style="background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(212,175,55,.1));border:1.5px solid rgba(212,175,55,.4);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">'
     +'<div style="font-family:var(--head);font-size:2.8rem;font-weight:900;color:#D4AF37;line-height:1">+'+pts+'</div>'
     +'<div style="font-size:.85rem;color:var(--muted);margin-top:.2rem">points fidélité offerts</div>'
     +'<div style="font-size:.78rem;font-weight:700;color:var(--gold);margin-top:.4rem">Nouveau total : '+total+' pts</div>'
@@ -8239,8 +8755,21 @@ function showRewardConfig(productName, palierName, prod) {
     +'<div id="supp-total" style="font-size:.82rem;color:var(--gold);font-weight:700;margin-top:.35rem;display:none"></div>'
     +'</div>';
 
-  html += '<div class="form-group mt-1"><label class="form-label">📝 Note cuisine (optionnel)</label>'
-    +'<input class="form-input" id="prod-note" placeholder="Ex: sans oignon, extra sauce..."/></div>';
+  // Boisson incluse dans le menu
+  if (p.includedDrink) {
+    var drinkProd = getProducts().find(function(x){return x.id===p.includedDrink;});
+    if (drinkProd) {
+      html += '<div style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:.55rem .75rem;margin-top:.5rem;display:flex;align-items:center;gap:.5rem">'
+        +'<span style="font-size:1.1rem">🥤</span>'
+        +'<span style="font-size:.82rem;font-weight:600;color:var(--gold)">Boisson incluse : <span style="color:var(--text)">'+drinkProd.name+'</span></span>'
+        +'</div>';
+    }
+  }
+  // Note cuisine (conditionnée à allowNote du produit, true par défaut)
+  if (p.allowNote !== false) {
+    html += '<div class="form-group mt-1"><label class="form-label">📝 Note cuisine (optionnel)</label>'
+      +'<input class="form-input" id="prod-note" placeholder="Ex: sans oignon, extra sauce..."/></div>';
+  };
 
   // Bottom bar
   var suppCost = 0;
@@ -8350,15 +8879,15 @@ function shareReferral(code) {
 function showMaintenanceScreen(msg) {
   var body = document.body;
   body.innerHTML = '<div style="position:fixed;inset:0;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;gap:1.5rem">'
-    +'<div style="font-family:var(--head);font-size:2.5rem;font-weight:900;color:#fff">Break <span style=\\"color:#C8232B\\">Antillais</span></div>'
+    +'<div style="font-family:var(--head);font-size:2.5rem;font-weight:900;color:#fff">Break <span style=\\"color:#D4AF37\\">Antillais</span></div>'
     +'<div style="font-family:var(--head);font-size:1.5rem;font-weight:800;color:#fff">Fermeture temporaire</div>'
     +'<div style="font-size:1rem;color:rgba(255,255,255,.6);max-width:300px;line-height:1.6">'+msg+'</div>'
-    +'<div style="font-size:.8rem;color:#C8232B;margin-top:.5rem">Revenez bientot !</div>'
+    +'<div style="font-size:.8rem;color:#D4AF37;margin-top:.5rem">Revenez bientot !</div>'
     +'<div style="margin-top:2rem;border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;width:100%;max-width:320px">'
     +'<div style="font-size:.75rem;color:rgba(255,255,255,.3);margin-bottom:.75rem">Accès administrateur</div>'
     +'<input id="maint-email" type="email" placeholder="Email admin" style="width:100%;padding:.6rem .9rem;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-size:.9rem;margin-bottom:.5rem;box-sizing:border-box"/>'
     +'<input id="maint-pwd" type="password" placeholder="Mot de passe" style="width:100%;padding:.6rem .9rem;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-size:.9rem;margin-bottom:.75rem;box-sizing:border-box"/>'
-    +'<button onclick="maintLogin()" style="width:100%;padding:.65rem;border-radius:8px;background:#C8232B;border:none;color:#fff;font-weight:700;cursor:pointer;font-size:.9rem">Se connecter</button>'
+    +'<button onclick="maintLogin()" style="width:100%;padding:.65rem;border-radius:8px;background:#D4AF37;border:none;color:#0C0A08;font-weight:700;cursor:pointer;font-size:.9rem">Se connecter</button>'
     +'<div id="maint-err" style="color:#ef4444;font-size:.78rem;margin-top:.4rem"></div>'
     +'</div>'
     +'</div>';
@@ -8704,7 +9233,7 @@ function afficherOffreMai() {
     btnM.onclick = function(){ if(qte>1){qte--;spanQte.textContent=qte;} };
     var btnP = document.createElement('button');
     btnP.textContent = '+';
-    btnP.style.cssText = 'width:32px;height:32px;border-radius:50%;background:#C8232B;border:none;color:#fff;font-size:1.2rem;cursor:pointer';
+    btnP.style.cssText = 'width:32px;height:32px;border-radius:50%;background:#D4AF37;border:none;color:#fff;font-size:1.2rem;cursor:pointer';
     btnP.onclick = function(){ qte++;spanQte.textContent=qte; };
     ligneQte.appendChild(lblQte);
     ligneQte.appendChild(btnM);
@@ -8712,7 +9241,7 @@ function afficherOffreMai() {
     ligneQte.appendChild(btnP);
     var btnAdd = document.createElement('button');
     btnAdd.textContent = '🛒 Ajouter au panier';
-    btnAdd.style.cssText = 'width:100%;padding:.75rem;background:#C8232B;border:none;color:#fff;font-weight:800;font-size:.95rem;border-radius:8px;cursor:pointer;margin-bottom:.4rem;display:block';
+    btnAdd.style.cssText = 'width:100%;padding:.75rem;background:#D4AF37;border:none;color:#fff;font-weight:800;font-size:.95rem;border-radius:8px;cursor:pointer;margin-bottom:.4rem;display:block';
     btnAdd.onclick = function(){
       var prods = getProducts();
       var prod = prods.find(function(p){ return (p.id==='trio_bokit')||(p.name&&p.name.toLowerCase().indexOf('trio')>=0); });

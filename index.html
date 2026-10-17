@@ -483,6 +483,49 @@ html, body { background: var(--dark) !important; }
 
 ::-webkit-scrollbar-thumb { background: rgba(212,175,55,.5); }
 
+/* ═════════ PAGE MENU — disposition Nuit d'Or ═════════ */
+#home-body { max-width: 1080px; margin: 0 auto; padding-bottom: 1.5rem; }
+.nd-home { padding: 0 1.25rem; }
+.nd-hero { text-align: center; padding: 1.6rem 0 0; }
+.nd-hello { font-size: .8rem; color: var(--muted); margin-bottom: 1.1rem; }
+.nd-hello span { color: var(--text); font-weight: 600; }
+.nd-eyebrow { font-size: .68rem; letter-spacing: .32em; text-transform: uppercase; color: var(--gold); }
+.nd-title { font-family: var(--head); font-weight: 400; font-size: clamp(2.3rem, 9vw, 3.6rem); line-height: 1; letter-spacing: -.03em; margin-top: .8rem; white-space: nowrap; color: var(--text); }
+.nd-title em { font-style: italic; color: var(--gold); }
+.nd-sub { font-family: var(--head); font-size: 1.05rem; line-height: 1.4; color: #E7DFD0; margin-top: .8rem; }
+.nd-rule { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 1.4rem auto 0; max-width: 420px; }
+.nd-status { max-width: 560px; margin: 1.3rem auto .4rem; border: 1px solid rgba(212,175,55,.35); border-radius: 4px; padding: 1rem 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.nd-status-lbl { display: flex; align-items: center; gap: .45rem; font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.nd-dot { width: 7px; height: 7px; border-radius: 50%; background: #c46a5a; flex-shrink: 0; }
+.nd-status.is-open .nd-dot { background: #6FCF97; box-shadow: 0 0 0 3px rgba(111,207,151,.15); }
+.nd-status-txt { font-family: var(--head); font-size: 1.1rem; margin-top: .25rem; }
+.nd-status-meta { font-size: .74rem; color: var(--muted); margin-top: .15rem; }
+.nd-status-btn { flex-shrink: 0; border-radius: 2px; min-height: 44px; }
+
+.nd-carte-head { display: flex; align-items: baseline; justify-content: space-between; padding: 1.8rem 1.25rem .4rem; scroll-margin-top: 70px; }
+.nd-carte-head h2 { font-family: var(--head); font-style: italic; font-weight: 400; font-size: 1.6rem; }
+.nd-carte-head span { font-size: .75rem; color: var(--muted); }
+#home-body .tabs { margin: 0 1.25rem; padding: 0; }
+
+/* Liste de produits façon carte de restaurant */
+#home-body .pgrid { display: grid; grid-template-columns: 1fr; column-gap: 3rem; gap: 0 3rem; padding: .3rem 1.25rem 1rem; }
+@media (min-width: 900px) { #home-body .pgrid { grid-template-columns: 1fr 1fr; } }
+#home-body .pcard { display: flex; align-items: center; gap: 1rem; background: transparent; border: none; border-bottom: 1px solid var(--border); border-radius: 0; padding: 1rem 0; overflow: visible; box-shadow: none; transform: none; }
+#home-body .pcard:hover { transform: none; box-shadow: none; border-color: var(--border); }
+#home-body .pcard:hover .pcard-name { color: var(--gold); }
+#home-body .pcard-img { width: 68px; height: 68px; border-radius: 50%; overflow: hidden; flex-shrink: 0; font-size: 1.7rem; border: 1px solid rgba(212,175,55,.25); }
+#home-body .pcard-body { flex: 1; min-width: 0; padding: 0; display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: .9rem; align-items: center; }
+#home-body .pcard-body > * { grid-column: 1; }
+#home-body .pcard-foot { grid-column: 2; grid-row: 1 / span 3; margin: 0; gap: .8rem; }
+#home-body .pcard-name { font-family: var(--head); font-weight: 500; font-size: 1.08rem; line-height: 1.2; margin: 0; }
+#home-body .pcard-desc { font-size: .76rem; margin-top: .2rem; }
+#home-body .pcard-price { font-family: var(--head); font-weight: 500; font-size: 1.05rem; color: var(--gold); }
+#home-body .pcard-add { width: 44px; height: 44px; font-size: 1.3rem; }
+#home-body .pcard-fav { top: .7rem; left: 48px; width: 26px; height: 26px; font-size: .75rem; background: rgba(12,10,8,.85); border: 1px solid rgba(212,175,55,.3); }
+#home-body .soon-badge { top: auto; bottom: .7rem; left: 0; right: auto; font-size: .56rem; color: var(--on-accent); }
+#home-body .pcard.unavail { opacity: .45; }
+@media (max-width: 380px) { #home-body .pcard-img { width: 56px; height: 56px; } .nd-status { flex-direction: column; align-items: stretch; text-align: left; } }
+
 </style>
 </head>
 <body>
@@ -553,7 +596,7 @@ html, body { background: var(--dark) !important; }
 <script>
 
 'use strict';
-var APP_VERSION = '202604272128';
+var APP_VERSION = '202610171900';
 // Vérifier si une nouvelle version est disponible
 function checkAppUpdate() {
   try {
@@ -2102,23 +2145,23 @@ function renderHome() {
     }
   });
 
-  var html = '<div style="padding-bottom:1rem">';
-  html += '<div id="home-hero-inner" style="padding:.9rem 1rem .35rem">';
-  html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">';
-  if (user) html += '<div style="font-weight:700;font-size:1rem">Bonjour <span style="color:var(--red)">'+user.prenom+'</span> 👋</div>';
-  else html += '<div style="font-weight:700;font-size:.95rem;color:var(--red)">🌴 Specialites Antillaises</div>';
-  // Badge statut (sauf fermeture exceptionnelle)
-  if (!todayClosed) {
-    html += '<span style="display:inline-flex;align-items:center;gap:.35rem;'
-      +'padding:.25rem .75rem;border-radius:100px;font-size:.72rem;font-weight:700;'
-      +'background:'+(open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)')
-      +';color:'+(open?'#10b981':'#ef4444')+'">'
-      +(open?'🟢 Jusqu&apos;a '+cfg.cutoff:'🔴 Ferme')
-      +'</span>';
-  }
-  html += '</div>';
-  html += '<div style="font-size:.74rem;color:var(--muted);margin-top:.3rem">Bokit · Agoulou · Crepes — Retrait '+cfg.start+'–'+cfg.end+'</div>';
+  var html = '<div class="nd-home">';
+  html += '<div id="home-hero-inner" class="nd-hero">';
+  if (user) html += '<div class="nd-hello">Bonjour <span>'+user.prenom+'</span></div>';
+  html += '<div class="nd-eyebrow">Street food antillaise</div>';
+  html += '<h1 class="nd-title">Le goût <em>des îles</em></h1>';
+  html += '<p class="nd-sub">Bokits, agoulous et crêpes, préparés minute.</p>';
+  html += '<div class="nd-rule"></div>';
   html += '</div>'; // close hero
+  // Encadré statut
+  var _stLbl = todayClosed ? 'Fermeture exceptionnelle' : (open ? 'Ouvert aujourd&apos;hui' : 'Commandes fermées');
+  var _stTxt = open ? 'Commande avant '+cfg.cutoff : (isWorkDay && !todayClosed ? 'Réouverture au prochain service' : 'À très vite');
+  html += '<div class="nd-status'+(open?' is-open':'')+'">'
+    + '<div><div class="nd-status-lbl"><span class="nd-dot"></span>'+_stLbl+'</div>'
+    + '<div class="nd-status-txt">'+_stTxt+'</div>'
+    + '<div class="nd-status-meta">Retrait '+cfg.start+' – '+cfg.end+'</div></div>'
+    + '<button class="btn btn-primary nd-status-btn" onclick="var c=document.getElementById(\'nd-carte\');if(c)c.scrollIntoView({behavior:\'smooth\'})">'+(open?'Commander':'Voir la carte')+'</button>'
+    + '</div>';
   // Not a work day message
   if (!isWorkDay) {
     var dayNames = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
@@ -2174,8 +2217,9 @@ function renderHome() {
   var hasFeatured = prods.some(function(p){ return p.featured || (freq[p.name]&&freq[p.name]>=2); });
 
   var cats = [];
-  if(hasFeatured) cats.push({k:'featured',l:'⭐ Top'});
-  cats = cats.concat([{k:'bokit',l:'🫓 Bokits'},{k:'agoulou',l:'🌯 Agoulou'},{k:'crepe_salee',l:'🥞 Crepes Salee'},{k:'crepe_sucree',l:'🍫 Crepes Sucree'},{k:'mini_bokit',l:'📦 Box Mini'},{k:'enfant',l:'🧒 Enfants'},{k:'enfant_agoulou',l:'🌯🧒 Enfant Agoulou'},{k:'boisson',l:'🥤 Boissons'}]);
+  if(hasFeatured) cats.push({k:'featured',l:'Incontournables'});
+  cats = cats.concat([{k:'bokit',l:'Bokits'},{k:'agoulou',l:'Agoulous'},{k:'crepe_salee',l:'Crêpes salées'},{k:'crepe_sucree',l:'Crêpes sucrées'},{k:'mini_bokit',l:'Box mini'},{k:'enfant',l:'Enfants'},{k:'enfant_agoulou',l:'Enfant agoulou'},{k:'boisson',l:'Boissons'}]);
+  html += '<div id="nd-carte" class="nd-carte-head"><h2>La carte</h2><span>Retrait '+cfg.start+' – '+cfg.end+'</span></div>';
   html += '<div class="tabs">';
   cats.forEach(function(c,i){ html += '<button class="tab-btn'+(i===0?' active':'')+'" data-cat="'+c.k+'" onclick="filterCat(this.dataset.cat,this)">'+c.l+'</button>'; });
   html += '</div>';
